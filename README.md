@@ -1,7 +1,8 @@
 # Clerc-Backend
 
 ###Runing
-1. install ruby 
+1. install ruby and dependancies by doing 
+```gem install XXXX```
 2. run 
     ```ruby server.rb```
 3. in another window curl
