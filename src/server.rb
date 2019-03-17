@@ -26,14 +26,15 @@ end
 
 get '/' do
   status 200
-  return log_info("Great, your backend is set up. Now you can configure the Stripe example apps to point here.")
+  return log_info("Connection Successful")
 end
 
-post '/authenticate' do
-  log_info(json_params.to_s)
-
-  #authenticate!
+get '/make_customer' do
+  customer = Stripe::Customer.create()
+  status 201  #successful in creating a stripe customer
+  return log_info( customer[:id]+"\n")
 end
+
 
 def authenticate!
   # This code simulates "loading the Stripe customer for your current session".
