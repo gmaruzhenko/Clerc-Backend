@@ -6,6 +6,7 @@ require 'sinatra'
 require 'stripe'
 require 'json'
 
+#TODO make stripe api key initilized from request once stripe connect is ready
 Stripe.api_key = "sk_test_dUndr7GHsaxgYD9o9jxn6Kmy"
 
 def log_info(message)
@@ -28,30 +29,33 @@ get '/' do
   status 200
   return log_info("Connection Successful")
 end
-
+#
+# Create a customer in our platform account
+#
 get '/make_customer' do
   customer = Stripe::Customer.create()
   status 201  #successful in creating a stripe customer
   return log_info( customer[:id]+"\n")
 end
 
+#
+#Creates a charge on a stripe connected account
+#
 
-def authenticate!
-  # This code simulates "loading the Stripe customer for your current session".
-  # Your own logic will likely look very different.
-  return @customer if @customer
-  if session.has_key?(:customer_id)
-    customer_id = session[:customer_id]
-    begin
-      @customer = Stripe::Customer.retrieve(customer_id)
-    rescue Stripe::InvalidRequestError
-    end
-  else
-    begin
-      @customer = Stripe::Customer.create(json_params)
-    rescue Stripe::InvalidRequestError
-    end
-    session[:customer_id] = @customer.id
-  end
-  @customer
+post '/charge' do
+  json_recieved = json_params
+
+  #TODO make token request first between customer and store
+  token = Stripe::Token.create({
+                                   :customer => json_recieved['customer_id'],
+                               }, {:stripe_account => json_recieved['store_account_id']})
+
+  charge = Stripe::Charge.create({
+                                     amount: json_recieved['amount'],
+                                     currency: "cad",
+                                     source: token.id,
+                                     application_fee_amount: 123,
+                                 }, stripe_account: json_recieved['store_account_id'])
+  status 201
+
 end
