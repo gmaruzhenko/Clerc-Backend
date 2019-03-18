@@ -3,6 +3,8 @@ class Vendor
     
     # Define getters (Vendor is read-only)
     attr_reader :firebase_id, :name, :stripe_publishable_key, :stripe_user_id, :stripe_access_token, :stripe_refresh_token
+    # We can change firebase id at a later time
+    attr_writer :firebase_id
 
     @firebase_id
     @name
