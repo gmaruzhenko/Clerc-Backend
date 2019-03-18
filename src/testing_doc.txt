@@ -1,0 +1,473 @@
+Setting up an account:
+acct_1EF8oRE9arq1d7WU
+TODO Make this work for payments since it still throws error:
+Your account cannot currently make charges. To find out why charge creation is currently disabled, look at the `verification.disabled_reason` property on this account (/v1/accounts/acct_1EF8oRE9arq1d7WU)
+------------------------------------------------------------------------------------------------------------------------
+REQUEST
+------------------------------------------------------------------------------------------------------------------------
+curl https://api.stripe.com/v1/accounts \
+>   -u sk_test_dsoNrcwd0QnNHt8znIVNpCJK \
+>   -d type=custom \
+>   -d country=US \
+>   -d business_type=company \
+>   -d requested_capabilities[]=card_payments \
+>   -d external_account[object]=bank_account \
+>   -d external_account[country]=US \
+>   -d external_account[currency]=usd \
+>   -d external_account[routing_number]=110000000 \
+>   -d external_account[account_number]=000123456789 \
+>   -d tos_acceptance[date]=1547923073 \
+>   -d tos_acceptance[ip]="172.18.80.19"
+
+------------------------------------------------------------------------------------------------------------------------
+OUTPUT
+------------------------------------------------------------------------------------------------------------------------
+Enter host password for user 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK':
+{
+  "id": "acct_1EF8oRE9arq1d7WU",
+  "object": "account",
+  "business_profile": {
+    "mcc": null,
+    "name": null,
+    "product_description": null,
+    "support_address": null,
+    "support_email": null,
+    "support_phone": null,
+    "support_url": null,
+    "url": null
+  },
+  "business_type": "company",
+  "capabilities": {
+    "card_payments": "inactive"
+  },
+  "charges_enabled": false,
+  "company": {
+    "address": {
+      "city": null,
+      "country": "US",
+      "line1": null,
+      "line2": null,
+      "postal_code": null,
+      "state": null
+    },
+    "name": null,
+    "owners_provided": false,
+    "tax_id_provided": false
+  },
+  "country": "US",
+  "created": 1552866884,
+  "default_currency": "usd",
+  "details_submitted": false,
+  "email": null,
+  "external_accounts": {
+    "object": "list",
+    "data": [
+      {
+        "id": "ba_1EF8oRE9arq1d7WUR6VYUZAw",
+        "object": "bank_account",
+        "account": "acct_1EF8oRE9arq1d7WU",
+        "account_holder_name": null,
+        "account_holder_type": null,
+        "bank_name": "STRIPE TEST BANK",
+        "country": "US",
+        "currency": "usd",
+        "default_for_currency": true,
+        "fingerprint": "nrOyIuNacdpmEcmq",
+        "last4": "6789",
+        "metadata": {
+        },
+        "routing_number": "110000000",
+        "status": "new"
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/accounts/acct_1EF8oRE9arq1d7WU/external_accounts"
+  },
+  "metadata": {
+  },
+  "payouts_enabled": false,
+  "requirements": {
+    "current_deadline": null,
+    "currently_due": [
+      "business_profile.mcc",
+      "business_profile.url",
+      "company.address.city",
+      "company.address.line1",
+      "company.address.postal_code",
+      "company.address.state",
+      "company.name",
+      "company.phone",
+      "company.tax_id",
+      "relationship.account_opener",
+      "relationship.owner"
+    ],
+    "disabled_reason": "requirements.past_due",
+    "eventually_due": [
+      "business_profile.mcc",
+      "business_profile.url",
+      "company.address.city",
+      "company.address.line1",
+      "company.address.postal_code",
+      "company.address.state",
+      "company.name",
+      "company.phone",
+      "company.tax_id",
+      "relationship.account_opener",
+      "relationship.owner"
+    ],
+    "past_due": [
+      "business_profile.mcc",
+      "business_profile.url",
+      "company.address.city",
+      "company.address.line1",
+      "company.address.postal_code",
+      "company.address.state",
+      "company.name",
+      "company.phone",
+      "company.tax_id",
+      "relationship.account_opener",
+      "relationship.owner"
+    ]
+  },
+  "settings": {
+    "branding": {
+      "icon": null,
+      "logo": null,
+      "primary_color": null
+    },
+    "card_payments": {
+      "decline_on": {
+        "avs_failure": false,
+        "cvc_failure": false
+      }
+    },
+    "dashboard": {
+      "display_name": null,
+      "timezone": "Etc/UTC"
+    },
+    "payments": {
+      "statement_descriptor": ""
+    },
+    "payouts": {
+      "debit_negative_balances": false,
+      "schedule": {
+        "delay_days": 2,
+        "interval": "daily"
+      },
+      "statement_descriptor": null
+    }
+  },
+  "tos_acceptance": {
+    "date": 1547923073,
+    "ip": "172.18.80.19",
+    "user_agent": null
+  },
+  "type": "custom"
+}
+------------------------------------------------------------------------------------------------------------------------
+UPDATE INFO REQUEST
+------------------------------------------------------------------------------------------------------------------------
+
+curl https://api.stripe.com/v1/accounts/acct_1EF8oRE9arq1d7WU \
+>   -H "accounts_upgrade=true" \
+>   -u sk_test_dsoNrcwd0QnNHt8znIVNpCJK \
+>   -d business_profile[mcc]=5045 \
+>   -d business_profile[url]=https://cookies.com \
+>   -d company[address][city]=Schenectady \
+>   -d company[address][line1]="123 State St" \
+>   -d company[address][postal_code]=12345 \
+>   -d company[address][state]=NY \
+>   -d company[tax_id]=000000000 \
+>   -d company[name]="The Best Cookie Co" \
+>   -d company[phone]=6315068772 \
+>   -d external_account[object]=bank_account \
+>   -d external_account[account_number]=000123456789 \
+>   -d external_account[routing_number]=110000000 \
+>   -d external_account[country]=US \
+>   -d external_account[currency]=usd \
+>   -d tos_acceptance[date]=1539356786 \
+>   -d tos_acceptance[ip]="127.0.0.1" \
+>
+------------------------------------------------------------------------------------------------------------------------
+OUTPUT
+------------------------------------------------------------------------------------------------------------------------
+Enter host password for user 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK':
+{
+  "id": "acct_1EF8oRE9arq1d7WU",
+  "object": "account",
+  "business_profile": {
+    "mcc": "5045",
+    "name": "The Best Cookie Co",
+    "product_description": null,
+    "support_address": null,
+    "support_email": null,
+    "support_phone": null,
+    "support_url": null,
+    "url": "https://cookies.com"
+  },
+  "business_type": "company",
+  "capabilities": {
+    "card_payments": "inactive"
+  },
+  "charges_enabled": false,
+  "company": {
+    "address": {
+      "city": "Schenectady",
+      "country": "US",
+      "line1": "123 State St",
+      "line2": null,
+      "postal_code": "12345",
+      "state": "NY"
+    },
+    "name": "The Best Cookie Co",
+    "owners_provided": false,
+    "phone": "6315068772",
+    "tax_id_provided": true
+  },
+  "country": "US",
+  "created": 1552866884,
+  "default_currency": "usd",
+  "details_submitted": false,
+  "email": null,
+  "external_accounts": {
+    "object": "list",
+    "data": [
+      {
+        "id": "ba_1EF8x8E9arq1d7WUrQkKE3pf",
+        "object": "bank_account",
+        "account": "acct_1EF8oRE9arq1d7WU",
+        "account_holder_name": null,
+        "account_holder_type": null,
+        "bank_name": "STRIPE TEST BANK",
+        "country": "US",
+        "currency": "usd",
+        "default_for_currency": true,
+        "fingerprint": "nrOyIuNacdpmEcmq",
+        "last4": "6789",
+        "metadata": {
+        },
+        "routing_number": "110000000",
+        "status": "new"
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/accounts/acct_1EF8oRE9arq1d7WU/external_accounts"
+  },
+  "metadata": {
+  },
+  "payouts_enabled": false,
+  "requirements": {
+    "current_deadline": null,
+    "currently_due": [
+      "relationship.account_opener",
+      "relationship.owner"
+    ],
+    "disabled_reason": "requirements.past_due",
+    "eventually_due": [
+      "relationship.account_opener",
+      "relationship.owner"
+    ],
+    "past_due": [
+      "relationship.account_opener",
+      "relationship.owner"
+    ]
+  },
+  "settings": {
+    "branding": {
+      "icon": null,
+      "logo": null,
+      "primary_color": null
+    },
+    "card_payments": {
+      "decline_on": {
+        "avs_failure": false,
+        "cvc_failure": false
+      }
+    },
+    "dashboard": {
+      "display_name": "Cookies",
+      "timezone": "Etc/UTC"
+    },
+    "payments": {
+      "statement_descriptor": "COOKIES.COM"
+    },
+    "payouts": {
+      "debit_negative_balances": false,
+      "schedule": {
+        "delay_days": 2,
+        "interval": "daily"
+      },
+      "statement_descriptor": null
+    }
+  },
+  "tos_acceptance": {
+    "date": 1539356786,
+    "ip": "127.0.0.1",
+    "user_agent": null
+  },
+  "type": "custom"
+}
+
+------------------------------------------------------------------------------------------------------------------------
+ADD CREATER PERSON
+------------------------------------------------------------------------------------------------------------------------
+
+curl https://api.stripe.com/v1/accounts/acct_1EF8oRE9arq1d7WU/persons \
+  -H "accounts_upgrade=true" \
+  -u sk_test_dsoNrcwd0QnNHt8znIVNpCJK \
+  -d first_name=Jenny \
+  -d last_name=Rosen \
+  -d relationship[account_opener]=true \
+  -d relationship[title]=CEO \
+-d address[city]=Schenectady \
+-d address[line1]="123 State St" \
+-d address[postal_code]=12345 \
+-d address[state]=NY \
+-d dob[day]=10 \
+-d dob[month]=11 \
+-d dob[year]=1980 \
+-d id_number=000000000 \
+-d phone=2015550123 \
+-d email="jenny@cookies.com"
+
+------------------------------------------------------------------------------------------------------------------------
+OUTPUT
+------------------------------------------------------------------------------------------------------------------------
+Enter host password for user 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK':
+{
+  "id": "person_EiaE4GtG7WGYRI",
+  "object": "person",
+  "account": "acct_1EF8oRE9arq1d7WU",
+  "address": {
+    "city": "Schenectady",
+    "country": "US",
+    "line1": "123 State St",
+    "line2": null,
+    "postal_code": "12345",
+    "state": "NY"
+  },
+  "created": 1552867833,
+  "dob": {
+    "day": 10,
+    "month": 11,
+    "year": 1980
+  },
+  "email": "jenny@cookies.com",
+  "first_name": "Jenny",
+  "id_number_provided": true,
+  "last_name": "Rosen",
+  "metadata": {
+  },
+  "phone": "+12015550123",
+  "relationship": {
+    "account_opener": true,
+    "director": false,
+    "owner": false,
+    "percent_ownership": null,
+    "title": "CEO"
+  },
+  "requirements": {
+    "currently_due": [
+
+    ],
+    "eventually_due": [
+
+    ],
+    "past_due": [
+
+    ]
+  },
+  "ssn_last_4_provided": true,
+  "verification": {
+    "details": null,
+    "details_code": null,
+    "document": {
+      "back": null,
+      "details": null,
+      "details_code": null,
+      "front": null
+    },
+    "status": "pending"
+  }
+}
+
+------------------------------------------------------------------------------------------------------------------------
+ADD OWNER PERSON
+------------------------------------------------------------------------------------------------------------------------
+curl https://api.stripe.com/v1/accounts/acct_1EF8oRE9arq1d7WU/persons \
+  -H "accounts_upgrade=true" \
+  -u sk_test_dsoNrcwd0QnNHt8znIVNpCJK \
+  -d first_name=Kathleen \
+  -d last_name=Banks \
+  -d email="kathleen@cookies.com" \
+  -d relationship[owner]=true \
+  -d relationship[percent_ownership]=100
+------------------------------------------------------------------------------------------------------------------------
+OUTPUT
+------------------------------------------------------------------------------------------------------------------------
+  Enter host password for user 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK':
+  {
+    "id": "person_EiaGcGSpS12RVB",
+    "object": "person",
+    "account": "acct_1EF8oRE9arq1d7WU",
+    "address": {
+      "city": null,
+      "country": "US",
+      "line1": null,
+      "line2": null,
+      "postal_code": null,
+      "state": null
+    },
+    "created": 1552867998,
+    "dob": {
+      "day": null,
+      "month": null,
+      "year": null
+    },
+    "email": "kathleen@cookies.com",
+    "first_name": "Kathleen",
+    "id_number_provided": false,
+    "last_name": "Banks",
+    "metadata": {
+    },
+    "relationship": {
+      "account_opener": false,
+      "director": false,
+      "owner": true,
+      "percent_ownership": 100.0,
+      "title": null
+    },
+    "requirements": {
+      "currently_due": [
+
+      ],
+      "eventually_due": [
+        "address.city",
+        "address.line1",
+        "address.postal_code",
+        "address.state",
+        "dob.day",
+        "dob.month",
+        "dob.year",
+        "phone",
+        "ssn_last_4"
+      ],
+      "past_due": [
+
+      ]
+    },
+    "ssn_last_4_provided": false,
+    "verification": {
+      "details": null,
+      "details_code": null,
+      "document": {
+        "back": null,
+        "details": null,
+        "details_code": null,
+        "front": null
+      },
+      "status": "pending"
+    }
+  }
