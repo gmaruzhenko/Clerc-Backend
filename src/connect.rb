@@ -3,10 +3,13 @@
 require 'sinatra'
 require 'stripe'
 require 'json'
+require 'unirest'
 require "google/cloud/firestore"
 
 FIREBASE_PROJ_ID = "paywithclerc" #TODO this should be an environment variable
-Stripe.api_key = "sk_test_BGUip2DhwDI2yHRBHQPTQK7Q" # TODO this should also be an environment variable
+STRIPE_API_SECRET = "sk_test_BGUip2DhwDI2yHRBHQPTQK7Q" # TODO this should also be an environment variable
+STRIPE_CONNECTED_ACCT_URL = "https://connect.stripe.com/oauth/token"
+Stripe.api_key = STRIPE_API_SECRET 
 
 # Creates a firestore client
 def initFirestoreClient project_id:
@@ -28,19 +31,33 @@ end
 # Once the business gives us authorization, frontend will receive an AUTHORIZATION_CODE
 # which is then passed to this method. We will use the AUTHORIZATION_CODE to retrieve credentials for the business
 post 'connect/create-standard-account' do
-    log_info(json_params.to_s) # Used for debugging only - remove in production
+    
+    # Get the authorization code & cast to string
+    id = request["id"].to_str
+    name = request["name"].to_str
+    authCode = request["account_auth_code"].to_str
 
-    # Check that we received a valid authorization code
+    # Check that it's not empty, otherwise continue
+    if authCode.empty? || name.empty? || id.empty?
+        halt 400, "Invalid request"
+    end
 
-    # If we received an authorization code, make the Stripe request
-#     Post to the following using HTTParty
-#     curl https://connect.stripe.com/oauth/token \
+    # Retrieve required fields from Stripe
+#    curl https://connect.stripe.com/oauth/token \
 #   -d client_secret=sk_test_BGUip2DhwDI2yHRBHQPTQK7Q \
 #   -d code="{AUTHORIZATION_CODE}" \
 #   -d grant_type=authorization_code
-
-    # Check that we have a non-errored response
-
+    stripeData = {
+        :client_secret => STRIPE_API_SECRET,
+        :code => authCode,
+        :grant_type=> 'authorization_code'
+    }
+    stripeResponse = Unirest.post STRIPE_CONNECTED_ACCT_URL, parameters: stripeData
+    # for debugging
+    puts stripeData
+    # Check that we have a returned success 
+    if stripeResponse.code != 200:
+        halt 400, "Something went wrong"
 
     # Response is valid, store informaton specific to the retailer in firestore
     # {
@@ -53,7 +70,11 @@ post 'connect/create-standard-account' do
     #     "access_token": "{ACCESS_TOKEN}"
     #   }
 
+    # TODO save this stuff in firestore
+    puts stripeResponse.raw_body
+    puts stripeResponse.code
+    puts stripeResponse.body
+
     # If all this is done and good, return a success message
-
-
+    "Success!"
   end
