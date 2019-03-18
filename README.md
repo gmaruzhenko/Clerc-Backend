@@ -10,23 +10,31 @@
 1. Start the server
 ```ruby server.rb```
 2. in another window curl
-```curl -i -X POST -H "Content-Type: application/json" -d'{"description":"sample", "my_customer_id":"12345"}' http://localhost:4567/authenticate```
+```curl -d '{"amount":"1000", "customer_id":"cus_Eic7D12EByBANL", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EALLCF8Tv70HUia"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/charge```
 
+3. View output on account = Sample:
+https://dashboard.stripe.com/test/connect/overview
 ### Endpoints
-####Base URL
+#####Base URL
 http://34.219.126.153:4567
-####Extensions
-/
+#####Extensions
+GET
 
-/make_customer
+    /
 
-/charge
-#### Authenticate
+    /make_customer
+POST
 
-### Testing
+    /charge
+    Json Params Required = amount , customer_id , CONNECTED_STRIPE_ACCOUNT_ID
+    
+   
+  
+##### Authenticate
+
+#### Testing
 0. Add mvp-1.pem from lastpass to a file in your home directory.
  
-(need your IP as well to add to firewall whitelist SSH call below)
 1. Connect to ec2
 ```ssh -i "mvp-1.pem" ubuntu@ec2-34-219-126-153.us-west-2.compute.amazonaws.com```
 2. run server
@@ -34,11 +42,10 @@ http://34.219.126.153:4567
 3. In another tab run any of following
 - Test connection:
 ```curl -X GET http://34.219.126.153:4567/```
-Expected output
+
+    Expected output =
 ```Connection Successful```
 - Make customer:
-```curl -i -X GET  http://34.219.126.153:4567//make_customer```
+```curl -i -X GET  http://34.219.126.153:4567/make_customer```
 - Charge: 
-``` 
-curl -d '{"amount":"1000", "customer_id":"cus_EiVLxx6AchEMo9", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EF7IEK75jC5vRr0"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/charge
-```
+```curl -d '{"amount":"1000", "customer_id":"cus_Eic7D12EByBANL", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EALLCF8Tv70HUia"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/charge```
