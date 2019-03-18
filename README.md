@@ -40,12 +40,12 @@ POST
 - Charge: 
 ```curl -d '{"amount":"1000", "customer_id":"cus_Eic7D12EByBANL", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EALLCF8Tv70HUia"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/charge```
 
-###Account notes
-#####Sample
-MAIN ACCOUNT
+### Account notes
+- **Primary:** Main Stripe Connect Account
+- **Connected - 1:** Connected account to main stripe account
 
-#####test1
-CONNECTED_STRIPE_ACCOUNT_ID =acct_1EALLCF8Tv70HUia
+##### ADDITIONAL INFO: Connected - 1 
+CONNECTED_STRIPE_ACCOUNT_ID=```acct_1EALLCF8Tv70HUia```
 ``` 
 curl -d '{"amount":"1000", "customer_id":"cus_EiVLxx6AchEMo9", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EF7IEK75jC5vRr0"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/charge
 ```
