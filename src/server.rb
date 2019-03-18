@@ -77,13 +77,10 @@ post '/create-standard-account' do
 
   # Get the authorization code & cast to string
   json_input=json_params
-  id = json_input['id']
-  authCode = json_input['account_auth_code']
-  log_info(json_input.to_s)
 
   # Check that it's not empty, otherwise continue
-  if authCode.empty? || id.empty?
-    halt 400, "Invalid request - Missing parameters"
+  if authCode.empty?
+    halt 400, "Invalid request"
   end
 
   # Retrieve required fields from Stripe
@@ -91,14 +88,14 @@ post '/create-standard-account' do
   #   -d client_secret=sk_test_BGUip2DhwDI2yHRBHQPTQK7Q \
   #   -d code="{AUTHORIZATION_CODE}" \
   #   -d grant_type=authorization_code
+
   stripeData = {
       :client_secret => STRIPE_API_SECRET,
-      :code => authCode,
+      :code => json_input['account_auth_code'],
       :grant_type=> 'authorization_code'
   }
   stripeResponse = Unirest.post STRIPE_CONNECTED_ACCT_URL, parameters: stripeData
-  # for debugging
-  puts stripeData
+
   # Check that we have a returned success
   if stripeResponse.code != 200
       halt 400, "Something went wrong"
@@ -118,7 +115,7 @@ post '/create-standard-account' do
   #puts stripeResponse.raw_body
   #puts stripeResponse.code
   #puts stripeResponse.body
-  log_info(stripeResponse)
+  #log_info(stripeResponse)
 
   # If all this is done and good, return a success message
   log_info("Success!")
