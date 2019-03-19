@@ -16,9 +16,7 @@
 !.vscode/launch.json
 !.vscode/extensions.json
 Clerc-2040e3a661c9.json
-
-# Used by dotenv library to load environment variables.
-# .env
+**/.env
 
 # Ignore Byebug command history file.
 .byebug_history
