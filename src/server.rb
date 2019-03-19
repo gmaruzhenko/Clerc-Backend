@@ -79,7 +79,7 @@ post '/create-standard-account' do
   json_input=json_params
 
   # Check that it's not empty, otherwise continue
-  if authCode.empty?
+  if json_input.empty?
     halt 400, "Invalid request"
   end
 
@@ -90,15 +90,26 @@ post '/create-standard-account' do
   #   -d grant_type=authorization_code
 
   stripeData = {
-      :client_secret => STRIPE_API_SECRET,
+      :client_secret => "sk_test_dsoNrcwd0QnNHt8znIVNpCJK",
       :code => json_input['account_auth_code'],
       :grant_type=> 'authorization_code'
   }
-  stripeResponse = Unirest.post STRIPE_CONNECTED_ACCT_URL, parameters: stripeData
+  puts(stripeData)
+  #TODO Frank try tinkering with this to make it not throw the following error
+  # {
+  #   "error": "invalid_client",
+  #   "error_description": "No authentication was provided. Send your secret API key using the Authorization header, or as a client_secret POST parameter."
+  # }
+  # here is a good link for unirest = http://unirest.io/ruby.html
+  stripeResponse = Unirest.post(STRIPE_CONNECTED_ACCT_URL, headers: {"Accept" => "application/json", "Authorization"=>"sk_test_dsoNrcwd0QnNHt8znIVNpCJK"}, parameters: stripeData.to_json)
+  # stripeResponse = Unirest.post STRIPE_CONNECTED_ACCT_URL,
+  #                               headers:{ "Accept" => "application/json" },
+  #                               parameters:stripeData.to_json
 
   # Check that we have a returned success
   if stripeResponse.code != 200
       halt 400, "Something went wrong"
+  end
 
   # Response is valid, store informaton specific to the retailer in firestore
   # {
@@ -112,13 +123,13 @@ post '/create-standard-account' do
   #   }
 
   # TODO save this stuff in firestore
-  #puts stripeResponse.raw_body
-  #puts stripeResponse.code
-  #puts stripeResponse.body
+  puts stripeResponse.raw_body
+  puts stripeResponse.code
+  puts stripeResponse.body
   #log_info(stripeResponse)
 
   # If all this is done and good, return a success message
   log_info("Success!")
   status 201
-  end
+  #end
 end
