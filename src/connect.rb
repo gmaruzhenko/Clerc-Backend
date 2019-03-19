@@ -82,8 +82,9 @@ post 'connect/create-standard-account' do
     # for debugging
     puts stripeData
     # Check that we have a returned success 
-    if stripeResponse.code != 200:
+    if (stripeResponse.code != 200)
         halt 400, "Something went wrong"
+    end
 
     # Response is valid, store informaton specific to the retailer in firestore
     # {
