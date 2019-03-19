@@ -6,9 +6,18 @@ require 'sinatra'
 require 'stripe'
 require 'json'
 require 'http'
+require 'google/cloud/firestore'
+require_relative 'Model/Vendor'
 
-FIREBASE_PROJ_ID = 'paywithclerc'.freeze # TODO: this should be an environment variable
-STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze # TODO: this should also be an environment variable - use "dotenv" gem
+
+# Load environment variables for development (comment out in Prod)
+# You can download the required .env file from Google Drive. See README
+require 'dotenv'
+Dotenv.load
+
+# Loading environment variables will likely look very different in EC2
+FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID'].freeze
+STRIPE_API_SECRET = ENV['STRIPE_API_SECRET'].freeze
 STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 Stripe.api_key = STRIPE_API_SECRET
 
@@ -22,6 +31,42 @@ Stripe.api_key = STRIPE_API_SECRET
 # for local testing comment out line below
 # set :bind, '0.0.0.0'
 
+# Saves connected account to firestore and returns the firebase ID
+def save_vendor(vendor)
+
+  firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
+  puts 'Firestore client initialized'
+
+  # Reference to the vendors collection
+  vendors_ref = firestore.col 'vendors'
+  basic_vendor_data = {
+    name: vendor.name
+  }
+  puts "Saving vendor: #{vendor.name}"
+
+  added_vendor_ref = vendors_ref.doc
+  added_vendor_ref.set basic_vendor_data
+  puts "Successfully saved vendor #{vendor.name} with ID: #{added_vendor_ref.document_id}."
+
+  # Now save all the stripe information
+  vendor_stripe_ref = added_vendor_ref.col('backend').doc('stripe')
+  stripe_data = {
+    stripe_publishable_key: vendor.stripe_publishable_key,
+    stripe_user_id: vendor.stripe_user_id,
+    stripe_refresh_token: vendor.stripe_refresh_token,
+    stripe_access_token: vendor.stripe_access_token
+  }
+  vendor_stripe_ref.set stripe_data
+  puts 'Successfully saved vendor Stripe data'
+
+  # Return the firebase ID
+  added_vendor_ref.document_id
+end
+
+# Retrieves a connected account from firestore
+# TODO make this function
+# def getVendor; end
+
 helpers do
   # Json parser with error check
   def json_params
@@ -32,7 +77,7 @@ helpers do
 
   # send log info to console for debugging
   def log_info(message)
-    puts "\nINFO:" + message + "\n\n"
+    puts "\nINFO: " + message + "\n\n"
     message
   end
 end
@@ -73,17 +118,20 @@ end
 # Once the business gives us authorization, frontend will receive an AUTHORIZATION_CODE
 # which is then passed to this method. We will use the AUTHORIZATION_CODE to retrieve credentials for the business
 post '/create-standard-account' do
-  # Get the authorization code & cast to string
+
+  # Get params
   json_input = json_params
 
   # Check that it's not empty, otherwise continue
   halt 400, 'Invalid request' if json_input.empty?
 
+  new_account_auth = json_input['account_auth_code']
+
   # Retrieve required fields from Stripe
   # Required data to pass
   stripe_data = {
     client_secret: STRIPE_API_SECRET,
-    code: json_input['account_auth_code'],
+    code: new_account_auth,
     grant_type: 'authorization_code'
   }
 
@@ -94,27 +142,26 @@ post '/create-standard-account' do
   stripe_response = HTTP.post(STRIPE_CONNECTED_ACCT_URL,
                               form: stripe_data)
 
+  # DEBUGGING ONLY TODO REMOVE IN PROD
+  puts "Stripe response body: #{stripe_response.body}"
+
   # Check that we have a returned success
   halt 400, 'Something went wrong' if stripe_response.code != 200
 
-  # Response is valid, store informaton specific to the retailer in firestore
-  # {
-  #     "token_type": "bearer",
-  #     "stripe_publishable_key": "{PUBLISHABLE_KEY}",
-  #     "scope": "read_write",
-  #     "livemode": false,
-  #     "stripe_user_id": "{ACCOUNT_ID}",
-  #     "refresh_token": "{REFRESH_TOKEN}",
-  #     "access_token": "{ACCESS_TOKEN}"
-  #   }
+  # Response is valid, store information specific to the retailer in firestore
+  stripe_response_body = JSON.parse(stripe_response.body) #TODO extract as helper function
+  vendor_pub_key = stripe_response_body['stripe_publishable_key']
+  vendor_user_id = stripe_response_body['stripe_user_id']
+  vendor_refresh_token = stripe_response_body['refresh_token']
+  vendor_access_token = stripe_response_body['access_token']
+  # Construct the vendor object
+  new_vendor = Vendor.new(nil, "Test", vendor_pub_key, vendor_user_id, vendor_refresh_token, vendor_access_token)
 
-  # TODO: save this stuff in firestore
-  puts stripe_response.code
-  puts stripe_response.body
-  # log_info(stripeResponse)
+  firebase_id = save_vendor new_vendor
 
-  # If all this is done and good, return a success message
-  log_info('Success!')
+  log_info('Success in creating standard account!')
+
+  # Return the firebase ID
   status 201
-  # end
+  firebase_id
 end
