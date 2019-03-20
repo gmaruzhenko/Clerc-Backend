@@ -80,6 +80,33 @@ helpers do
     puts "\nINFO: " + message + "\n\n"
     message
   end
+
+  def authenticate!
+    # This code simulates "loading the Stripe customer for your current session".
+    # Your own logic will likely look very different.
+    return @customer if @customer
+    if session.has_key?(:customer_id)
+      customer_id = session[:customer_id]
+      begin
+        @customer = Stripe::Customer.retrieve(customer_id)
+      rescue Stripe::InvalidRequestError
+      end
+    else
+      begin
+        @customer = Stripe::Customer.create(
+            :description => 'mobile SDK example customer',
+            :metadata => {
+                # Add our application's customer id for this Customer, so it'll be easier to look up
+                :my_customer_id => '72F8C533-FCD5-47A6-A45B-3956CA8C792D',
+            },
+            )
+      rescue Stripe::InvalidRequestError
+      end
+      session[:customer_id] = @customer.id
+    end
+    @customer
+  end
+
 end
 
 # Test endpoint to check if server is up
@@ -166,28 +193,19 @@ post '/create-standard-account' do
   firebase_id
 end
 
-def authenticate!
-  # This code simulates "loading the Stripe customer for your current session".
-  # Your own logic will likely look very different.
-  return @customer if @customer
-  if session.has_key?(:customer_id)
-    customer_id = session[:customer_id]
-    begin
-      @customer = Stripe::Customer.retrieve(customer_id)
-    rescue Stripe::InvalidRequestError
-    end
-  else
-    begin
-      @customer = Stripe::Customer.create(
-          :description => 'mobile SDK example customer',
-          :metadata => {
-              # Add our application's customer id for this Customer, so it'll be easier to look up
-              :my_customer_id => '72F8C533-FCD5-47A6-A45B-3956CA8C792D',
-          },
-          )
-    rescue Stripe::InvalidRequestError
-    end
-    session[:customer_id] = @customer.id
+post '/ephemeral_keys' do
+  authenticate!
+  begin
+    key = Stripe::EphemeralKey.create(
+        {customer: @customer.id},
+        {stripe_version: params["api_version"]}
+    )
+  rescue Stripe::StripeError => e
+    status 402
+    return log_info("Error creating ephemeral key: #{e.message}")
   end
-  @customer
+
+  content_type :json
+  status 200
+  key.to_json
 end
