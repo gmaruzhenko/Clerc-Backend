@@ -22,6 +22,7 @@ POST
     Json Params Required = amount , customer_id , CONNECTED_STRIPE_ACCOUNT_ID
     
 ### Operation
+0. FOR LOCAL DEVELOPMENT: Place .env file (located in Clerc's Google Drive/Code/Keys/.env) in src
 0. Add mvp-1.pem from lastpass to a file in your home directory.
 0. Set Google Environment variable (Get JSON from Google Drive - place this in main directory - this won't be committed)
 ```export GOOGLE_APPLICATION_CREDENTIALS="/home/user/Downloads/[FILE_NAME].json```
