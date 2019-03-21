@@ -31,9 +31,6 @@ Stripe.api_key = STRIPE_API_SECRET
 # for local testing comment out line below
 # set :bind, '0.0.0.0'
 
-#TODO enable sessions
-#enable :sessions
-
 
 # Saves connected account to firestore and returns the firebase ID
 def save_vendor(vendor)
@@ -83,27 +80,6 @@ helpers do
   def log_info(message)
     puts "\nINFO: " + message + "\n\n"
     message
-  end
-
-  def authenticate!
-    # This code simulates "loading the Stripe customer for your current session".
-    # Your own logic will likely look very different.
-    return @customer if @customer
-    if session.has_key?(:customer_id)
-      customer_id = session[:customer_id]
-      begin
-        @customer = Stripe::Customer.retrieve(customer_id)
-      rescue Stripe::InvalidRequestError
-      end
-    else
-      begin
-        @customer = Stripe::Customer.create(
-            :description => 'authenticate! made')
-      rescue Stripe::InvalidRequestError
-      end
-      session[:customer_id] = @customer.id
-    end
-    @customer
   end
 
 end
