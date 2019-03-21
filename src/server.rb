@@ -57,29 +57,61 @@ end
 
 # Create a customer in our platform account
 get '/make_customer' do
-  customer = Stripe::Customer.create(
-    source: 'tok_mastercard' # obtained with Stripe.js
-  )
-  status 201 # successful in creating a stripe customer
-  return log_info(customer[:id] + "\n")
+  customer = Stripe::Customer.create
+  log_info(customer[:id] + "\n")
+  # successful in creating a stripe customer - return id
+  status 201
+  customer[:id]
 end
 
 # Creates a charge on a stripe connected account
 post '/charge' do
+
+  # Get params
   json_received = json_params
-  # TODO Gosha - please initialize all variables like "customer" and do error checking here
 
-  token = Stripe::Token.create({
-                                 customer: json_received['customer_id']
-                               }, stripe_account: json_received['CONNECTED_STRIPE_ACCOUNT_ID'])
+  # Check that input is not empty, otherwise continue
+  halt 400, 'Invalid request - no JSON given' if json_received.empty?
 
+  # Check that required params are passed
+  cust_id = json_received['customer_id']
+  connected_vendor_id = json_received['CONNECTED_STRIPE_ACCOUNT_ID']
+  payment_source = json_received['payment_source']
+  amount = json_received['amount']
+
+  if cust_id.empty? || connected_vendor_id.empty? || payment_source.empty? || amount.empty?
+    halt 400, 'Invalid request - required params not passed'
+  end
+
+  # TODO: this will update the source every time.. not sure we need to - see what the app does
+  # Stripe::Customer.create_source(
+  #   'cus_AFGbOSiITuJVDs',
+  #   {
+  #     source: 'src_18eYalAHEMiOZZp1l9ZTjSU0',
+  #   }
+  # )
   charge = Stripe::Charge.create({
-                                   amount: json_received['amount'],
+                                   amount: amount,
                                    currency: 'cad',
-                                   source: token.id,
-                                   application_fee_amount: 123
-                                 }, stripe_account: json_received['CONNECTED_STRIPE_ACCOUNT_ID'])
-  status 201
+                                   customer: cust_id,
+                                   source: payment_source,
+                                   # TODO fill the in (5 cents for now)
+                                   application_fee_amount: 5,
+                                   description: 'description',
+                                   statement_descriptor: 'Custom descriptor',
+                                 }, stripe_account: connected_vendor_id)
+
+  # Charge successful
+  if charge.paid
+    log_info 'Charge successful'
+    status 201
+    # Return the charge ID
+    charge.id
+  # Charge unsuccessful
+  else
+    log_info 'Charge unsuccessful'
+    # TODO: Do what when charge unsuccessful???
+  end
 end
 
 # This is called by front-end once the connected account is authorized
@@ -89,13 +121,13 @@ end
 post('/create-standard-account') do
 
   # Get params
-  json_input = json_params
+  json_received = json_params
 
   # Check that it's not empty, otherwise continue
-  halt 400, 'Invalid request - no JSON given' if json_input.empty?
+  halt 400, 'Invalid request - no JSON given' if json_received.empty?
 
-  new_account_auth = json_input['account_auth_code']
-  new_account_name = json_input['vendor_name']
+  new_account_auth = json_received['account_auth_code']
+  new_account_name = json_received['vendor_name']
 
   # Check that parameters are given
   halt 400, 'Invalid request - missing fields' if new_account_auth.empty? || new_account_name.empty?
@@ -108,14 +140,14 @@ post('/create-standard-account') do
   }
 
   # DEBUGGING ONLY TODO REMOVE IN PROD
-  puts "Data passed to stripe: #{stripe_data.to_json}"
+  log_info "Data passed to stripe: #{stripe_data.to_json}"
 
   # Make request to Stripe
   stripe_response = HTTP.post(STRIPE_CONNECTED_ACCT_URL,
                               form: stripe_data)
 
   # DEBUGGING ONLY TODO REMOVE IN PROD
-  puts "Stripe response body: #{stripe_response.body}"
+  log_info "Stripe response body: #{stripe_response.body}"
 
   # Check that we have a returned success
   halt 400, 'Stripe call was unsuccessful. Please check input parameters' if
