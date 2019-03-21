@@ -190,6 +190,10 @@ post '/create-standard-account' do
   firebase_id
 end
 
+#generates temp key for ios
+# TODO add this to readme below
+# curl -d '{"customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14"}' -H "Content-Type: application/json" -X POST http:/localhost:4567/gen_ephemeral_key
+# {"id":"ephkey_1EGTyPLrlHDdcgZ3QoKMX3rd","object":"ephemeral_key","associated_objects":[{"id":"cus_Eic7D12EByBANL","type":"customer"}],"created":1553186553,"expires":1553190153,"livemode":false,"secret":"ek_test_YWNjdF8xRUVpaE9McmxIRGRjZ1ozLEhUMWNPc00zbXNCQjZ0UGNhRjJjVG9nRXVVWFUyWWs_00IN27Z9Ku"}
 post '/gen_ephemeral_key' do
 
   json_input = json_params
