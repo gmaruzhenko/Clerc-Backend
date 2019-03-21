@@ -30,6 +30,8 @@ Stripe.api_key = STRIPE_API_SECRET
 # configure to run as server
 # for local testing comment out line below
 # set :bind, '0.0.0.0'
+enable :sessions
+
 
 # Saves connected account to firestore and returns the firebase ID
 def save_vendor(vendor)
@@ -94,12 +96,7 @@ helpers do
     else
       begin
         @customer = Stripe::Customer.create(
-            :description => 'mobile SDK example customer',
-            :metadata => {
-                # Add our application's customer id for this Customer, so it'll be easier to look up
-                :my_customer_id => '72F8C533-FCD5-47A6-A45B-3956CA8C792D',
-            },
-            )
+            :description => 'authenticate! made')
       rescue Stripe::InvalidRequestError
       end
       session[:customer_id] = @customer.id
@@ -193,12 +190,16 @@ post '/create-standard-account' do
   firebase_id
 end
 
-post '/ephemeral_keys' do
-  authenticate!
+post '/gen_ephemeral_key' do
+
+  json_input = json_params
+  stripe_version = json_input['stripe_version']
+  customer_id = json_input['customer_id']
+
   begin
     key = Stripe::EphemeralKey.create(
-        {customer: @customer.id},
-        {stripe_version: params["api_version"]}
+        {customer: customer_id},
+        {stripe_version: stripe_version}
     )
   rescue Stripe::StripeError => e
     status 402
@@ -207,5 +208,5 @@ post '/ephemeral_keys' do
 
   content_type :json
   status 200
-  key.to_json
+  return key.to_json
 end
