@@ -56,12 +56,37 @@ get '/' do
 end
 
 # Create a customer in our platform account
-get '/make_customer' do
+get '/customers/create' do
   customer = Stripe::Customer.create
   log_info(customer[:id] + "\n")
-  # successful in creating a stripe customer - return id
+  # Create customer successful - return its id
   status 201
   customer[:id]
+end
+
+# generates temp key for ios
+# TODO add this to readme below
+# curl -d '{"customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14"}' -H "Content-Type: application/json" -X POST http:/localhost:4567/gen_ephemeral_key
+# {"id":"ephkey_1EGTyPLrlHDdcgZ3QoKMX3rd","object":"ephemeral_key","associated_objects":[{"id":"cus_Eic7D12EByBANL","type":"customer"}],"created":1553186553,"expires":1553190153,"livemode":false,"secret":"ek_test_YWNjdF8xRUVpaE9McmxIRGRjZ1ozLEhUMWNPc00zbXNCQjZ0UGNhRjJjVG9nRXVVWFUyWWs_00IN27Z9Ku"}
+post '/customers/create-ephemeral-key' do
+
+  json_input = json_params
+  stripe_version = json_input['stripe_version']
+  customer_id = json_input['customer_id']
+
+  begin
+    key = Stripe::EphemeralKey.create(
+      {customer: customer_id},
+      stripe_version: stripe_version
+    )
+  rescue Stripe::StripeError => e
+    status 402
+    return log_info("Error creating ephemeral key: #{e.message}")
+  end
+
+  content_type :json
+  status 200
+  return key.to_json
 end
 
 # Creates a charge on a stripe connected account
@@ -98,11 +123,11 @@ post '/charge' do
                                    # TODO fill the in (5 cents for now)
                                    application_fee_amount: 5,
                                    description: 'description',
-                                   statement_descriptor: 'Custom descriptor',
+                                   statement_descriptor: 'Custom descriptor'
                                  }, stripe_account: connected_vendor_id)
 
   # Charge successful
-  if charge.paid
+  if charge[:status] == 'succeeded'
     log_info 'Charge successful'
     status 201
     # Return the charge ID
@@ -110,6 +135,7 @@ post '/charge' do
   # Charge unsuccessful
   else
     log_info 'Charge unsuccessful'
+    log_info charge.to_json #TODO this is for debugging only
     # TODO: Do what when charge unsuccessful???
   end
 end
@@ -118,7 +144,7 @@ end
 # Once the business gives us authorization, frontend will receive a code
 # which is then passed to this method through a backend call.
 # We will use the AUTHORIZATION_CODE to retrieve credentials for the business
-post('/create-standard-account') do
+post('/vendors/connect-standard-account') do
 
   # Get params
   json_received = json_params
