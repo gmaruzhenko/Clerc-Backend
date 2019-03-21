@@ -7,8 +7,8 @@ require 'stripe'
 require 'json'
 require 'http'
 require 'google/cloud/firestore'
-require_relative 'Model/Vendor'
-
+require '../src/Model/Vendor'
+require '../src/Service/firestore'
 
 # Load environment variables for development (comment out in Prod)
 # You can download the required .env file from Google Drive. See README
@@ -16,8 +16,8 @@ require 'dotenv'
 Dotenv.load
 
 # Loading environment variables will likely look very different in EC2
-FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID'].freeze
-STRIPE_API_SECRET = ENV['STRIPE_API_SECRET'].freeze
+FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
+STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
 STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 Stripe.api_key = STRIPE_API_SECRET
 
@@ -31,51 +31,18 @@ Stripe.api_key = STRIPE_API_SECRET
 # for local testing comment out line below
 # set :bind, '0.0.0.0'
 
-# Saves connected account to firestore and returns the firebase ID
-def save_vendor(vendor)
-
-  firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
-  puts 'Firestore client initialized'
-
-  # Reference to the vendors collection
-  vendors_ref = firestore.col 'vendors'
-  basic_vendor_data = {
-    name: vendor.name
-  }
-  puts "Saving vendor: #{vendor.name}"
-
-  added_vendor_ref = vendors_ref.doc
-  added_vendor_ref.set basic_vendor_data
-  puts "Successfully saved vendor #{vendor.name} with ID: #{added_vendor_ref.document_id}."
-
-  # Now save all the stripe information
-  vendor_stripe_ref = added_vendor_ref.col('backend').doc('stripe')
-  stripe_data = {
-    stripe_publishable_key: vendor.stripe_publishable_key,
-    stripe_user_id: vendor.stripe_user_id,
-    stripe_refresh_token: vendor.stripe_refresh_token,
-    stripe_access_token: vendor.stripe_access_token
-  }
-  vendor_stripe_ref.set stripe_data
-  puts 'Successfully saved vendor Stripe data'
-
-  # Return the firebase ID
-  added_vendor_ref.document_id
-end
-
-# Retrieves a connected account from firestore
-# TODO make this function
-# def getVendor; end
+firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
+puts 'Firestore client initialized'
 
 helpers do
-  # Json parser with error check
+  # JSON Parameter parser for incoming response body
   def json_params
     JSON.parse(request.body.read)
   rescue StandardError
     halt 400, { message: 'Invalid JSON' }.to_json
   end
 
-  # send log info to console for debugging
+  # Logging
   def log_info(message)
     puts "\nINFO: " + message + "\n\n"
     message
@@ -100,6 +67,7 @@ end
 # Creates a charge on a stripe connected account
 post '/charge' do
   json_received = json_params
+  # TODO Gosha - please initialize all variables like "customer" and do error checking here
 
   token = Stripe::Token.create({
                                  customer: json_received['customer_id']
@@ -115,20 +83,24 @@ post '/charge' do
 end
 
 # This is called by front-end once the connected account is authorized
-# Once the business gives us authorization, frontend will receive an AUTHORIZATION_CODE
-# which is then passed to this method. We will use the AUTHORIZATION_CODE to retrieve credentials for the business
-post '/create-standard-account' do
+# Once the business gives us authorization, frontend will receive a code
+# which is then passed to this method through a backend call.
+# We will use the AUTHORIZATION_CODE to retrieve credentials for the business
+post('/create-standard-account') do
 
   # Get params
   json_input = json_params
 
   # Check that it's not empty, otherwise continue
-  halt 400, 'Invalid request' if json_input.empty?
+  halt 400, 'Invalid request - no JSON given' if json_input.empty?
 
   new_account_auth = json_input['account_auth_code']
+  new_account_name = json_input['vendor_name']
+
+  # Check that parameters are given
+  halt 400, 'Invalid request - missing fields' if new_account_auth.empty? || new_account_name.empty?
 
   # Retrieve required fields from Stripe
-  # Required data to pass
   stripe_data = {
     client_secret: STRIPE_API_SECRET,
     code: new_account_auth,
@@ -146,22 +118,25 @@ post '/create-standard-account' do
   puts "Stripe response body: #{stripe_response.body}"
 
   # Check that we have a returned success
-  halt 400, 'Something went wrong' if stripe_response.code != 200
+  halt 400, 'Stripe call was unsuccessful. Please check input parameters' if
+    stripe_response.code != 200
 
   # Response is valid, store information specific to the retailer in firestore
-  stripe_response_body = JSON.parse(stripe_response.body) #TODO extract as helper function
+  stripe_response_body = JSON.parse(stripe_response.body)
   vendor_pub_key = stripe_response_body['stripe_publishable_key']
   vendor_user_id = stripe_response_body['stripe_user_id']
   vendor_refresh_token = stripe_response_body['refresh_token']
   vendor_access_token = stripe_response_body['access_token']
   # Construct the vendor object
-  new_vendor = Vendor.new(nil, "Test", vendor_pub_key, vendor_user_id, vendor_refresh_token, vendor_access_token)
-
-  firebase_id = save_vendor new_vendor
+  new_vendor = Vendor.new(nil, new_account_name, vendor_pub_key,
+                          vendor_user_id, vendor_refresh_token, vendor_access_token)
+  # Save the new vendor to firebase
+  firebase_id = Firestore.save_vendor new_vendor, firestore
 
   log_info('Success in creating standard account!')
 
   # Return the firebase ID
   status 201
-  firebase_id
+  { firebase_id: firebase_id }.to_json
+
 end
