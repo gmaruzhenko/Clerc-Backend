@@ -101,7 +101,7 @@ post '/charge' do
   # Check that required params are passed
   cust_id = json_received['customer_id']
   connected_vendor_id = json_received['CONNECTED_STRIPE_ACCOUNT_ID']
-  payment_source = json_received['payment_source']
+  payment_source = json_received['payment_source'] # TODO - initial testing try this: src_1EGX0FAauIdsXPAaipHPd0ym
   amount = json_received['amount']
 
   if cust_id.empty? || connected_vendor_id.empty? || payment_source.empty? || amount.empty?
@@ -115,16 +115,21 @@ post '/charge' do
   #     source: 'src_18eYalAHEMiOZZp1l9ZTjSU0',
   #   }
   # )
-  charge = Stripe::Charge.create({
-                                   amount: amount,
-                                   currency: 'cad',
-                                   customer: cust_id,
-                                   source: payment_source,
-                                   # TODO fill the in (5 cents for now)
-                                   application_fee_amount: 5,
-                                   description: 'description',
-                                   statement_descriptor: 'Custom descriptor'
-                                 }, stripe_account: connected_vendor_id)
+  begin
+    charge = Stripe::Charge.create({
+                                     amount: amount,
+                                     currency: 'cad',
+                                     customer: cust_id,
+                                     source: payment_source,
+                                     # TODO fill the in (5 cents for now)
+                                     application_fee_amount: 5,
+                                     description: 'description',
+                                     statement_descriptor: 'Custom descriptor'
+                                   }, stripe_account: connected_vendor_id)
+  rescue Stripe::StripeError => e
+    status 402
+    return log_info("Error creating charge: #{e.message}")
+  end
 
   # Charge successful
   if charge[:status] == 'succeeded'
