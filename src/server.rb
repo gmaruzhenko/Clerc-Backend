@@ -101,26 +101,22 @@ post '/charge' do
   # Check that required params are passed
   cust_id = json_received['customer_id']
   connected_vendor_id = json_received['CONNECTED_STRIPE_ACCOUNT_ID']
-  payment_source = json_received['payment_source'] # TODO - initial testing try this: src_1EGX0FAauIdsXPAaipHPd0ym
+  payment_source = json_received['payment_source'] # TODO - initial testing try this: tok_visa
   amount = json_received['amount']
 
-  if cust_id.empty? || connected_vendor_id.empty? || payment_source.empty? || amount.empty?
+  if cust_id.nil? || connected_vendor_id.nil? || payment_source.nil? || amount.nil?
     halt 400, 'Invalid request - required params not passed'
   end
 
-  # TODO: this will update the source every time.. not sure we need to - see what the app does
-  # Stripe::Customer.create_source(
-  #   'cus_AFGbOSiITuJVDs',
-  #   {
-  #     source: 'src_18eYalAHEMiOZZp1l9ZTjSU0',
-  #   }
-  # )
+  token = Stripe::Token.create({
+                                 customer: cust_id
+                               }, stripe_account: connected_vendor_id)
   begin
     charge = Stripe::Charge.create({
                                      amount: amount,
                                      currency: 'cad',
                                      customer: cust_id,
-                                     source: payment_source,
+                                     source: token.id,
                                      # TODO fill the in (5 cents for now)
                                      application_fee_amount: 5,
                                      description: 'description',
@@ -161,7 +157,8 @@ post('/vendors/connect-standard-account') do
   new_account_name = json_received['vendor_name']
 
   # Check that parameters are given
-  halt 400, 'Invalid request - missing fields' if new_account_auth.empty? || new_account_name.empty?
+  halt 400, 'Invalid request - missing fields' if
+    new_account_auth.nil? || new_account_name.nil?
 
   # Retrieve required fields from Stripe
   stripe_data = {
