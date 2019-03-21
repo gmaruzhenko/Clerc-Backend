@@ -30,7 +30,9 @@ Stripe.api_key = STRIPE_API_SECRET
 # configure to run as server
 # for local testing comment out line below
 # set :bind, '0.0.0.0'
-enable :sessions
+
+#TODO enable sessions
+#enable :sessions
 
 
 # Saves connected account to firestore and returns the firebase ID
