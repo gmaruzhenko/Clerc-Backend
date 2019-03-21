@@ -15,11 +15,15 @@ GET
 
     /
 
+
     /make_customer
 POST
 
     /charge
     Json Params Required = amount , customer_id , CONNECTED_STRIPE_ACCOUNT_ID
+    
+    /create-standard-account
+    Json Params Required = account_auth_code
     
 ### Operation
 0. FOR LOCAL DEVELOPMENT: Place .env file (located in Clerc's Google Drive/Code/Keys/.env) in src
@@ -32,15 +36,18 @@ POST
 ```ruby server.rb```
 3. You can now run the following:
 - Test connection:
+
 ```curl -X GET http://34.219.126.153:4567/```
 
-    Expected output =
-```Connection Successful```
 - Make customer:
+
 ```curl -i -X GET  http://34.219.126.153:4567/make_customer```
 - Charge: 
-```curl -d '{"amount":"1000", "customer_id":"cus_Eic7D12EByBANL", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EALLCF8Tv70HUia"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/charge```
 
+```curl -d '{"amount":"1000", "customer_id":"cus_Eic7D12EByBANL", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EALLCF8Tv70HUia"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/charge```
+- Create connected account:
+
+```curl -d '{"account_auth_code":"ac_Eix70se8M3dejLmSxB2PMV3A7lQUjqg0"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/create-standard-account```
 ### Account notes
 - **Primary:** Main Stripe Connect Account
 - **Connected - 1:** Connected account to main stripe account
