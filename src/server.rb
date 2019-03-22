@@ -65,9 +65,6 @@ get '/customers/create' do
 end
 
 # generates temp key for ios
-# TODO add this to readme below
-# curl -d '{"customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14"}' -H "Content-Type: application/json" -X POST http:/localhost:4567/gen_ephemeral_key
-# {"id":"ephkey_1EGTyPLrlHDdcgZ3QoKMX3rd","object":"ephemeral_key","associated_objects":[{"id":"cus_Eic7D12EByBANL","type":"customer"}],"created":1553186553,"expires":1553190153,"livemode":false,"secret":"ek_test_YWNjdF8xRUVpaE9McmxIRGRjZ1ozLEhUMWNPc00zbXNCQjZ0UGNhRjJjVG9nRXVVWFUyWWs_00IN27Z9Ku"}
 post '/customers/create-ephemeral-key' do
 
   json_input = json_params
@@ -97,7 +94,6 @@ post '/charge' do
 
   # Check that input is not empty, otherwise continue
   halt 400, 'Invalid request - no JSON given' if json_received.empty?
-
   # Check that required params are passed
   cust_id = json_received['customer_id']
   connected_vendor_id = json_received['CONNECTED_STRIPE_ACCOUNT_ID']
@@ -183,8 +179,7 @@ post('/vendors/connect-standard-account') do
   log_info "Stripe response body: #{stripe_response.body}"
 
   # Check that we have a returned success
-  halt 400, 'Stripe call was unsuccessful. Please check input parameters' if
-    stripe_response.code != 200
+  halt 400, 'Stripe call was unsuccessful. Please check input parameters' if stripe_response.code != 200
 
   # Response is valid, store information specific to the retailer in firestore
   stripe_response_body = JSON.parse(stripe_response.body)

@@ -48,6 +48,11 @@ POST
 - Create connected account:
 
 ```curl -d '{"account_auth_code":"ac_Eix70se8M3dejLmSxB2PMV3A7lQUjqg0"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/create-standard-account```
+
+- Create ephemeral key:
+
+```curl -d '{"customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14"}' -H "Content-Type: application/json" -X POST http:/localhost:4567/gen_ephemeral_key```
+
 ### Account notes
 - **Primary:** Main Stripe Connect Account
 - **Connected - 1:** Connected account to main stripe account
