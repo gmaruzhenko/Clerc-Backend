@@ -56,6 +56,7 @@ get '/' do
 end
 
 # Create a customer in our platform account
+# @param = nil
 get '/customers/create' do
   customer = Stripe::Customer.create
   log_info(customer[:id] + "\n")
@@ -65,6 +66,8 @@ get '/customers/create' do
 end
 
 # generates temp key for ios
+# @param = stripe_version
+# @param = customer_id
 post '/customers/create-ephemeral-key' do
 
   json_input = json_params
@@ -87,6 +90,9 @@ post '/customers/create-ephemeral-key' do
 end
 
 # Creates a charge on a stripe connected account
+# @param = customer_id
+# @param = CONNECTED_STRIPE_ACCOUNT_ID
+# @param = amount
 post '/charge' do
 
   # Get params
@@ -146,6 +152,8 @@ end
 # Once the business gives us authorization, frontend will receive a code
 # which is then passed to this method through a backend call.
 # We will use the AUTHORIZATION_CODE to retrieve credentials for the business
+# @param = account_auth_code
+# @param = vendor_name
 post('/vendors/connect-standard-account') do
 
   # Get params
