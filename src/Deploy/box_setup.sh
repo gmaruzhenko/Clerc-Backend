@@ -10,6 +10,7 @@ sudo gem install bundler
 sudo bundler install
 ruby src/server.rb
 
+# now get files out of json and .env
+
 # export GOOGLE_APPLICATION_CREDENTIALS="../Clerc-2040e3a661c9.json"
 
-# now get files out of json and .env
