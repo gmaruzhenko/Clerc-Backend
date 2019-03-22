@@ -101,23 +101,27 @@ post '/charge' do
   # Check that required params are passed
   cust_id = json_received['customer_id']
   connected_vendor_id = json_received['CONNECTED_STRIPE_ACCOUNT_ID']
-  payment_source = json_received['payment_source'] # TODO - initial testing try this: tok_visa
+  # TODO - payment source is not used because we need to use a shared customer token
+  # TODO - we need to see if the iOS integration automatically updates payment for the customer (i.e. does selected payment change?)
+  # TODO - we will ignore this parameter for now
+  # payment_source = json_received['payment_source']
   amount = json_received['amount']
 
-  if cust_id.nil? || connected_vendor_id.nil? || payment_source.nil? || amount.nil?
+  if cust_id.nil? || connected_vendor_id.nil? || amount.nil? # || payment_source.nil?
     halt 400, 'Invalid request - required params not passed'
   end
 
-  token = Stripe::Token.create({
-                                 customer: cust_id
-                               }, stripe_account: connected_vendor_id)
   begin
+    # This creates a shared customer token, required for connected accounts
+    token = Stripe::Token.create({
+                                   customer: cust_id
+                                 }, stripe_account: connected_vendor_id)
+    # This creates a charge the token - the customer MUST have a payment method
     charge = Stripe::Charge.create({
                                      amount: amount,
                                      currency: 'cad',
-                                     customer: cust_id,
                                      source: token.id,
-                                     # TODO fill the in (5 cents for now)
+                                     # TODO: fill the below in from additional params
                                      application_fee_amount: 5,
                                      description: 'description',
                                      statement_descriptor: 'Custom descriptor'
@@ -133,11 +137,12 @@ post '/charge' do
     status 201
     # Return the charge ID
     charge.id
+
   # Charge unsuccessful
   else
     log_info 'Charge unsuccessful'
     log_info charge.to_json #TODO this is for debugging only
-    # TODO: Do what when charge unsuccessful???
+    # TODO: Do what when charge unsuccessful??? - test declined card
   end
 end
 
