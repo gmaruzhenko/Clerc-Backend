@@ -88,19 +88,18 @@ end
 
 # Creates a charge on a stripe connected account
 post '/charge' do
-
   # Get params
+
   json_received = json_params
 
   # Check that input is not empty, otherwise continue
   halt 400, 'Invalid request - no JSON given' if json_received.empty?
-
   # Check that required params are passed
   cust_id = json_received['customer_id']
   connected_vendor_id = json_received['CONNECTED_STRIPE_ACCOUNT_ID']
-  payment_source = json_received['payment_source'] # TODO - initial testing try this: src_1EGX0FAauIdsXPAaipHPd0ym
+    payment_source = json_received['payment_source'] # TODO - initial testing try this: src_1EGX0FAauIdsXPAaipHPd0ym
   amount = json_received['amount']
-
+  log_info(json_received.to_s)
   if cust_id.empty? || connected_vendor_id.empty? || payment_source.empty? || amount.empty?
     halt 400, 'Invalid request - required params not passed'
   end
@@ -118,8 +117,7 @@ post '/charge' do
                                      currency: 'cad',
                                      customer: cust_id,
                                      source: payment_source,
-                                     # TODO fill the in (5 cents for now)
-                                     application_fee_amount: 5,
+                                     application_fee_amount: 5,# TODO fill the in (5 cents for now)
                                      description: 'description',
                                      statement_descriptor: 'Custom descriptor'
                                    }, stripe_account: connected_vendor_id)
