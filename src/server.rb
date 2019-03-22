@@ -178,8 +178,7 @@ post('/vendors/connect-standard-account') do
   log_info "Stripe response body: #{stripe_response.body}"
 
   # Check that we have a returned success
-  halt 400, 'Stripe call was unsuccessful. Please check input parameters' if
-    stripe_response.code != 200
+  halt 400, 'Stripe call was unsuccessful. Please check input parameters' if stripe_response.code != 200
 
   # Response is valid, store information specific to the retailer in firestore
   stripe_response_body = JSON.parse(stripe_response.body)
