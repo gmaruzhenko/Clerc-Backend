@@ -9,7 +9,7 @@
 ### Endpoints
 
 ##### Base URL
-http://34.219.126.153:4567
+http://34.217.14.89:4567
 ##### Extensions
 GET
 
@@ -31,27 +31,27 @@ POST
 0. Set Google Environment variable (Get JSON from Google Drive - place this in main directory - this won't be committed)
 ```export GOOGLE_APPLICATION_CREDENTIALS="../[FILE_NAME].json"```
 1. Connect to EC2
-```ssh -i "mvp-1.pem" ubuntu@ec2-34-219-126-153.us-west-2.compute.amazonaws.com```
+```ssh -i "mvp-1.pem" ubuntu@ec2-34-217-14-89.us-west-2.compute.amazonaws.com```
 2. Run server
 ```ruby server.rb```
 3. You can now run the following:
 - Test connection:
 
-```curl -X GET http://34.219.126.153:4567/```
+```curl -X GET http://34.217.14.89:4567/```
 
 - Make customer:
 
-```curl -i -X GET  http://34.219.126.153:4567/make_customer```
+```curl -i -X GET  http://34.217.14.89:4567/make_customer```
 - Charge: 
 
-```curl -d '{"amount":"1000", "customer_id":"cus_Eic7D12EByBANL", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EALLCF8Tv70HUia"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/charge```
+```curl -d '{"amount":"1000", "customer_id":"cus_Eic7D12EByBANL", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EALLCF8Tv70HUia"}' -H "Content-Type: application/json" -X POST http://34.217.14.89:4567/charge```
 - Create connected account:
 
-```curl -d '{"account_auth_code":"ac_Eix70se8M3dejLmSxB2PMV3A7lQUjqg0"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/create-standard-account```
+```curl -d '{"account_auth_code":"ac_Eix70se8M3dejLmSxB2PMV3A7lQUjqg0"}' -H "Content-Type: application/json" -X POST http://34.217.14.89:4567/create-standard-account```
 
 - Create ephemeral key:
 
-```curl -d '{"customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14"}' -H "Content-Type: application/json" -X POST http:/localhost:4567/gen_ephemeral_key```
+```curl -d '{"customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14"}' -H "Content-Type: application/json" -X POST http:/34.217.14.89:4567/gen_ephemeral_key```
 
 ### Account notes
 - **Primary:** Main Stripe Connect Account
@@ -60,7 +60,7 @@ POST
 ##### ADDITIONAL INFO: Connected - 1 
 CONNECTED_STRIPE_ACCOUNT_ID=```acct_1EALLCF8Tv70HUia```
 ``` 
-curl -d '{"amount":"1000", "customer_id":"cus_EiVLxx6AchEMo9", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EF7IEK75jC5vRr0"}' -H "Content-Type: application/json" -X POST http://34.219.126.153:4567/charge
+curl -d '{"amount":"1000", "customer_id":"cus_EiVLxx6AchEMo9", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EF7IEK75jC5vRr0"}' -H "Content-Type: application/json" -X POST http://34.217.14.89:4567/charge
 ```
 
 ### Deployment

@@ -9,7 +9,7 @@ echo "Create Ephemeral Key"
 echo "Create Customer"
 #curl -i -X GET http://localhost:4567/customers/create
 echo "Charge"
-#TODO FRANK below
+#TODO FIX REQUEST below plz FRANK
 curl -d '{
   "customer_id": "cus_Ek9am5KQ70UyVh",
   "CONNECTED_STRIPE_ACCOUNT_ID": "acct_1EALLCF8Tv70HUia",
