@@ -88,8 +88,8 @@ end
 
 # Creates a charge on a stripe connected account
 post '/charge' do
-  # Get params
 
+  # Get params
   json_received = json_params
 
   # Check that input is not empty, otherwise continue
@@ -97,27 +97,28 @@ post '/charge' do
   # Check that required params are passed
   cust_id = json_received['customer_id']
   connected_vendor_id = json_received['CONNECTED_STRIPE_ACCOUNT_ID']
-    payment_source = json_received['payment_source'] # TODO - initial testing try this: src_1EGX0FAauIdsXPAaipHPd0ym
+  # TODO - payment source is not used because we need to use a shared customer token
+  # TODO - we need to see if the iOS integration automatically updates payment for the customer (i.e. does selected payment change?)
+  # TODO - we will ignore this parameter for now
+  # payment_source = json_received['payment_source']
   amount = json_received['amount']
-  log_info(json_received.to_s)
-  if cust_id.empty? || connected_vendor_id.empty? || payment_source.empty? || amount.empty?
+
+  if cust_id.nil? || connected_vendor_id.nil? || amount.nil? # || payment_source.nil?
     halt 400, 'Invalid request - required params not passed'
   end
 
-  # TODO: this will update the source every time.. not sure we need to - see what the app does
-  # Stripe::Customer.create_source(
-  #   'cus_AFGbOSiITuJVDs',
-  #   {
-  #     source: 'src_18eYalAHEMiOZZp1l9ZTjSU0',
-  #   }
-  # )
   begin
+    # This creates a shared customer token, required for connected accounts
+    token = Stripe::Token.create({
+                                   customer: cust_id
+                                 }, stripe_account: connected_vendor_id)
+    # This creates a charge the token - the customer MUST have a payment method
     charge = Stripe::Charge.create({
                                      amount: amount,
                                      currency: 'cad',
-                                     customer: cust_id,
-                                     source: payment_source,
-                                     application_fee_amount: 5,# TODO fill the in (5 cents for now)
+                                     source: token.id,
+                                     # TODO: fill the below in from additional params
+                                     application_fee_amount: 5,
                                      description: 'description',
                                      statement_descriptor: 'Custom descriptor'
                                    }, stripe_account: connected_vendor_id)
@@ -132,11 +133,12 @@ post '/charge' do
     status 201
     # Return the charge ID
     charge.id
+
   # Charge unsuccessful
   else
     log_info 'Charge unsuccessful'
     log_info charge.to_json #TODO this is for debugging only
-    # TODO: Do what when charge unsuccessful???
+    # TODO: Do what when charge unsuccessful??? - test declined card
   end
 end
 
@@ -156,7 +158,8 @@ post('/vendors/connect-standard-account') do
   new_account_name = json_received['vendor_name']
 
   # Check that parameters are given
-  halt 400, 'Invalid request - missing fields' if new_account_auth.empty? || new_account_name.empty?
+  halt 400, 'Invalid request - missing fields' if
+    new_account_auth.nil? || new_account_name.nil?
 
   # Retrieve required fields from Stripe
   stripe_data = {
