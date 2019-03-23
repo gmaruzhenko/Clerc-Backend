@@ -68,5 +68,11 @@ IMPORTANT: Set environment variable for Google Firestore as defined here: https:
 0. Have mvp.pem in the directory you are running the following command with.
 1. Connect to EC2
 ```ssh -i "mvp-1.pem" ubuntu@ec2-34-217-14-89.us-west-2.compute.amazonaws.co```
-2. Run server
-```ruby Clerc-Backend/src/server.rb```
+2. Run server to unix shell
+```nohup ruby Clerc-Backend/src/server.rb &```
+
+### Monitoring
+1. Find pid of server is by looking for ruby server (number on immediate right of ubuntu):
+```ps aux | grep ruby```
+2. Tail to get logs of process with pid (ex <pid> = 8381):
+````tail -f /proc/<pid>/fd/1````
