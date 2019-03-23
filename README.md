@@ -65,3 +65,8 @@ curl -d '{"amount":"1000", "customer_id":"cus_EiVLxx6AchEMo9", "CONNECTED_STRIPE
 
 ### Deployment
 IMPORTANT: Set environment variable for Google Firestore as defined here: https://cloud.google.com/docs/authentication/getting-started
+0. Have mvp.pem in the directory you are running the following command with.
+1. Connect to EC2
+```ssh -i "mvp-1.pem" ubuntu@ec2-34-217-14-89.us-west-2.compute.amazonaws.co```
+2. Run server
+```ruby Clerc-Backend/src/server.rb```
