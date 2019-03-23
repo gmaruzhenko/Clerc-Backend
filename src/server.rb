@@ -59,7 +59,7 @@ end
 # @param = nil
 get '/customers/create' do
   customer = Stripe::Customer.create
-  log_info(customer[:id] + "\n")
+  log_info("Customer created with ID #{customer[:id]}")
   # Create customer successful - return its id
   status 201
   customer[:id]
@@ -76,7 +76,7 @@ post '/customers/create-ephemeral-key' do
 
   begin
     key = Stripe::EphemeralKey.create(
-      {customer: customer_id},
+      { customer: customer_id },
       stripe_version: stripe_version
     )
   rescue Stripe::StripeError => e
@@ -103,22 +103,23 @@ post '/charge' do
   # Check that required params are passed
   cust_id = json_received['customer_id']
   connected_vendor_id = json_received['CONNECTED_STRIPE_ACCOUNT_ID']
-  # TODO - payment source is not used because we need to use a shared customer token
-  # TODO - we need to see if the iOS integration automatically updates payment for the customer (i.e. does selected payment change?)
-  # TODO - we will ignore this parameter for now
-  # payment_source = json_received['payment_source']
   amount = json_received['amount']
+  payment_src = json_received['source']
 
-  if cust_id.nil? || connected_vendor_id.nil? || amount.nil? # || payment_source.nil?
+  # Note : we don't need payment source because Stripe's mobile SDK
+  # automatically updates payment method via standard integration
+  if cust_id.nil? || connected_vendor_id.nil? || amount.nil? || payment_src.nil?
     halt 400, 'Invalid request - required params not passed'
   end
 
   begin
     # This creates a shared customer token, required for connected accounts
-    token = Stripe::Token.create({
-                                   customer: cust_id
-                                 }, stripe_account: connected_vendor_id)
-    # This creates a charge the token - the customer MUST have a payment method
+    token = Stripe::Source.create({
+                                    customer: cust_id,
+                                    original_source: payment_src,
+                                    usage: 'reusable'
+                                  }, stripe_account: connected_vendor_id)
+    # This creates a charge token - the customer MUST have a payment method
     charge = Stripe::Charge.create({
                                      amount: amount,
                                      currency: 'cad',
@@ -143,7 +144,7 @@ post '/charge' do
   # Charge unsuccessful
   else
     log_info 'Charge unsuccessful'
-    log_info charge.to_json #TODO this is for debugging only
+    log_info charge.to_json #TODO: this is for debugging only
     # TODO: Do what when charge unsuccessful??? - test declined card
   end
 end
