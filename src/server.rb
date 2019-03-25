@@ -9,6 +9,11 @@ require 'http'
 require 'google/cloud/firestore'
 require '../src/Model/Vendor'
 require '../src/Service/firestore'
+require '../src/Functions/endpointMethods'
+require '../src/Functions/helperFunctions'
+
+include EndpointMethods
+include HelperFunctions
 
 # Load environment variables for development (comment out in Prod)
 # You can download the required .env file from Google Drive. See README
@@ -50,20 +55,6 @@ end
 firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
 puts 'Firestore client initialized'
 
-helpers do
-  # JSON Parameter parser for incoming response body
-  def json_params
-    JSON.parse(request.body.read)
-  rescue StandardError
-    halt 400, { message: 'Invalid JSON' }.to_json
-  end
-
-  # Logging
-  def log_info(message)
-    puts "\nINFO: " + message + "\n\n"
-    message
-  end
-end
 
 # Test endpoint to check if server is up
 get '/' do
@@ -73,12 +64,9 @@ end
 
 # Create a customer in our platform account
 # @param = nil
+# @return = json stripe customer object
 get '/customers/create' do
-  customer = Stripe::Customer.create
-  log_info("Customer created with ID #{customer[:id]}")
-  # Create customer successful - return its id
-  status 201
-  customer[:id]
+  return createCustomer
 end
 
 # generates temp key for ios
@@ -109,6 +97,7 @@ end
 # @param = customer_id
 # @param = CONNECTED_STRIPE_ACCOUNT_ID
 # @param = amount
+# @return = stripe charge id
 post '/charge' do
 
   # Get params
