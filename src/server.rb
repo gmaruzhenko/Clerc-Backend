@@ -72,25 +72,9 @@ end
 # generates temp key for ios
 # @param = stripe_version
 # @param = customer_id
+# @return = json stripe ephemeral key object
 post '/customers/create-ephemeral-key' do
-
-  json_input = json_params
-  stripe_version = json_input['stripe_version']
-  customer_id = json_input['customer_id']
-
-  begin
-    key = Stripe::EphemeralKey.create(
-      { customer: customer_id },
-      stripe_version: stripe_version
-    )
-  rescue Stripe::StripeError => e
-    status 402
-    return log_info("Error creating ephemeral key: #{e.message}")
-  end
-
-  content_type :json
-  status 200
-  return key.to_json
+  return createEphemeralKey (json_params)
 end
 
 # Creates a charge on a stripe connected account
