@@ -1,7 +1,12 @@
 module EndpointMethods
 
   def createCustomer
-    customer = Stripe::Customer.create
+    begin
+      customer = Stripe::Customer.create
+    rescue Stripe::StripeError => e
+      status 402
+      return log_info("Error creating customer #{e.message}")
+      
     log_info("Customer created with ID #{customer[:id]}")
     # Create customer successful - return its id
     status 201
