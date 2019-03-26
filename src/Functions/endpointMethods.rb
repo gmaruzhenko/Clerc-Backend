@@ -6,7 +6,7 @@ module EndpointMethods
     rescue Stripe::StripeError => e
       status 402
       return log_info("Error creating customer #{e.message}")
-      
+
     log_info("Customer created with ID #{customer[:id]}")
     # Create customer successful - return its id
     status 201
@@ -42,7 +42,7 @@ module EndpointMethods
     cust_id = json_input['customer_id']
     connected_vendor_id = json_input['CONNECTED_STRIPE_ACCOUNT_ID']
     amount = json_input['amount']
-      payment_src = json_input['source']
+    payment_src = json_input['source']
 
     # Note : we don't need payment source because Stripe's mobile SDK
     # automatically updates payment method via standard integration
@@ -73,18 +73,10 @@ module EndpointMethods
     end
 
     # Charge successful
-    if charge[:status] == 'succeeded'
-      log_info 'Charge successful'
-      status 201
-      # Return the charge ID
-      return charge.id
-
-      # Charge unsuccessful
-    else
-      log_info 'Charge unsuccessful'
-      log_info charge.to_json #TODO: this is for debugging only
-      # TODO: Do what when charge unsuccessful??? - test declined card
-    end
+    log_info 'Charge successful'
+    status 201
+    # Return the charge ID
+    return charge.id
   end
 
   def connectStandardAccount (json_input)
