@@ -11,6 +11,7 @@ module EndpointMethods
     # Create customer successful - return its id
     status 201
     return customer[:id].to_json
+    end
   end
 
   def createEphemeralKey (json_input)
