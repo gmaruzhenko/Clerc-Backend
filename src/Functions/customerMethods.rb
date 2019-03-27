@@ -44,11 +44,18 @@ module CustomerMethods
     connected_vendor_id = json_input['CONNECTED_STRIPE_ACCOUNT_ID']
     amount = json_input['amount']
     payment_src = json_input['source']
+    charge_description = json_input['description']
+    statement_descriptor = json_input['statement_descriptor']
 
     # Note : we don't need payment source because Stripe's mobile SDK
     # automatically updates payment method via standard integration
-    if cust_id.nil? || connected_vendor_id.nil? || amount.nil? || payment_src.nil?
+    case
+    when cust_id.nil? || connected_vendor_id.nil? || amount.nil? || payment_src.nil?
       halt 400, 'Invalid request - required params not passed'
+    when charge_description.nil?
+      charge_description = ""
+    when statement_descriptor.nil?
+      statement_descriptor = ""
     end
 
     begin
@@ -65,8 +72,8 @@ module CustomerMethods
                                          source: token.id,
                                          # TODO: fill the below in from additional params
                                          application_fee_amount: 5,
-                                         description: 'description',
-                                         statement_descriptor: 'Custom descriptor'
+                                         description: charge_description,
+                                         statement_descriptor: statement_descriptor
                                      }, stripe_account: connected_vendor_id)
     rescue Stripe::StripeError => e
       status 402
