@@ -67,9 +67,12 @@ curl -d '{"amount":"1000", "customer_id":"cus_EiVLxx6AchEMo9", "CONNECTED_STRIPE
 IMPORTANT: Set environment variable for Google Firestore as defined here: https://cloud.google.com/docs/authentication/getting-started
 0. Have mvp.pem in the directory you are running the following command with.
 1. Connect to EC2
-```ssh -i "mvp-1.pem" ubuntu@ec2-34-217-14-89.us-west-2.compute.amazonaws.co```
+```ssh -i "mvp-1.pem" ubuntu@ec2-34-217-14-89.us-west-2.compute.amazonaws.com```
 2. Run server to unix shell
 ```nohup ruby Clerc-Backend/src/server.rb &```
+
+###TODO make tutorial for deploying zip file to box
+```scp -i "mvp.pem" -C server.zip ubuntu@34.217.14.89:server.zip```
 
 ### Monitoring
 1. Find pid of server is by looking for ruby server (number on immediate right of ubuntu):

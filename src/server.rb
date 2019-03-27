@@ -26,6 +26,9 @@ STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
 STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 Stripe.api_key = STRIPE_API_SECRET
 
+firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
+puts 'Firestore client initialized'
+
 # Our secret api key for logging customers in our account (comment to switch accounts during debugging)
 # Account name = Test1
 # Stripe.api_key = "sk_test_dUndr7GHsaxgYD9o9jxn6Kmy"
@@ -51,10 +54,6 @@ options "*" do
   response.headers["Access-Control-Allow-Origin"] = "*"
   200
 end
-
-firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
-puts 'Firestore client initialized'
-
 
 # Test endpoint to check if server is up
 get '/' do
@@ -94,5 +93,5 @@ end
 # @param = account_auth_code
 # @param = vendor_name
 post('/vendors/connect-standard-account') do
-  return connectStandardAccount(json_params)
+  return connectStandardAccount(json_params , firestore)
 end

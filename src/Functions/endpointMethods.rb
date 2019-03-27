@@ -5,13 +5,13 @@ module EndpointMethods
       customer = Stripe::Customer.create
     rescue Stripe::StripeError => e
       status 402
-      return log_info("Error creating customer #{e.message}")
+      return "Error creating customer #{e.message}"
 
     log_info("Customer created with ID #{customer[:id]}")
     # Create customer successful - return its id
-    status 201
-    return customer[:id].to_json
     end
+    status 201
+    return customer.id.to_json
   end
 
   def createEphemeralKey (json_input)
@@ -80,7 +80,7 @@ module EndpointMethods
     return charge.id
   end
 
-  def connectStandardAccount (json_input)
+  def connectStandardAccount (json_input , firestore)
 
     # Check that it's not empty, otherwise continue
     halt 400, 'Invalid request - no JSON given' if json_input.empty?
