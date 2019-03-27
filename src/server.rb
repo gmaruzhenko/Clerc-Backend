@@ -9,12 +9,13 @@ require 'http'
 require 'google/cloud/firestore'
 require '../src/Model/Vendor'
 require '../src/Service/firestore'
-require '../src/Functions/endpointMethods'
+require '../src/Functions/customerMethods'
 require '../src/Functions/helperFunctions'
+require '../src/Functions/vendorMethods'
 
-include EndpointMethods
 include HelperFunctions
-
+include CustomerMethods
+include VendorMethods
 # Load environment variables for development (comment out in Prod)
 # You can download the required .env file from Google Drive. See README
 require 'dotenv'
