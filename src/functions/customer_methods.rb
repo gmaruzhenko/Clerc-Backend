@@ -1,6 +1,6 @@
 module CustomerMethods
 
-  def createCustomer
+  def create_customer
     begin
       customer = Stripe::Customer.create
     rescue Stripe::StripeError => e
@@ -14,7 +14,7 @@ module CustomerMethods
     return customer.id.to_json
   end
 
-  def createEphemeralKey (json_input)
+  def create_ephemeral_key (json_input)
 
     stripe_version = json_input['stripe_version']
     customer_id = json_input['customer_id']

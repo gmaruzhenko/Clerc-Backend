@@ -1,6 +1,6 @@
 module VendorMethods
 
-  def connectStandardAccount (json_input , firestore)
+  def connect_standard_account (json_input , firestore)
 
     # Check that it's not empty, otherwise continue
     halt 400, 'Invalid request - no JSON given' if json_input.empty?

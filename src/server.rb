@@ -66,7 +66,7 @@ end
 # @param = nil
 # @return = json stripe customer object
 get '/customers/create' do
-  return createCustomer
+  return create_customer
 end
 
 # generates temp key for ios
@@ -74,7 +74,7 @@ end
 # @param = customer_id
 # @return = json stripe ephemeral key object
 post '/customers/create-ephemeral-key' do
-  return createEphemeralKey (json_params)
+  return create_ephemeral_key (json_params)
 end
 
 # Creates a charge on a stripe connected account
@@ -94,5 +94,5 @@ end
 # @param = account_auth_code
 # @param = vendor_name
 post('/vendors/connect-standard-account') do
-  return connectStandardAccount(json_params , firestore)
+  return connect_standard_account(json_params , firestore)
 end
