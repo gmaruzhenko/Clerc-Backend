@@ -1,5 +1,5 @@
 require 'google/cloud/firestore'
-require '../src/Model/Vendor'
+require '../src/model/Vendor'
 
 # Module for Firebase Firestore methods
 module Firestore
