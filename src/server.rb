@@ -9,9 +9,9 @@ require 'http'
 require 'google/cloud/firestore'
 require '../src/Model/Vendor'
 require '../src/Service/firestore'
-require '../src/Functions/customerMethods'
-require '../src/Functions/helperFunctions'
-require '../src/Functions/vendorMethods'
+require '../src/Functions/customer_methods'
+require '../src/Functions/helper_functions'
+require '../src/Functions/vendor_methods'
 
 include HelperFunctions
 include CustomerMethods
