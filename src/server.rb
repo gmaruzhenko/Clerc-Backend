@@ -84,7 +84,7 @@ end
 # @param = source
 # @return = stripe charge id
 post '/charge' do
-  return charge(json_params)
+  return charge(json_params, firestore)
 end
 
 # This is called by front-end once the connected account is authorized

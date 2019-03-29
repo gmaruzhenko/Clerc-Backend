@@ -1,3 +1,6 @@
+require '../service/firestore'
+include Firestore
+
 module CustomerMethods
 
   def create_customer
@@ -34,14 +37,14 @@ module CustomerMethods
     return key.to_json
   end
 
-  def charge (json_input)
+  def charge (json_input, firestore)
 
     # Check that input is not empty, otherwise continue
     halt 400, 'Invalid request - no JSON given' if json_input.empty?
 
     # Check that required params are passed
     cust_id = json_input['customer_id']
-    connected_vendor_id = json_input['CONNECTED_STRIPE_ACCOUNT_ID']
+    firebase_vendor_id = json_input['firebase_vendor_id']
     amount = json_input['amount']
     payment_src = json_input['source']
     charge_description = json_input['description']
@@ -50,7 +53,7 @@ module CustomerMethods
     # Note : we don't need payment source because Stripe's mobile SDK
     # automatically updates payment method via standard integration
     case
-    when cust_id.nil? || connected_vendor_id.nil? || amount.nil? || payment_src.nil?
+    when cust_id.nil? || firebase_vendor_id.nil? || amount.nil? || payment_src.nil?
       halt 400, 'Invalid request - required params not passed'
     when charge_description.nil?
       charge_description = ""
@@ -58,13 +61,20 @@ module CustomerMethods
       statement_descriptor = ""
     end
 
+    # Try getting the Vendor object from firebase
+    vendor_from_firebase = Firestore.load_vendor firebase_vendor_id, firestore
+    if vendor_from_firebase.nil?
+      halt 400, "Vendor ID was not found"
+    end 
+
+    vendor_stripe_id = vendor_from_firebase.stripe_user_id
     begin
       # This creates a shared customer token, required for connected accounts
       token = Stripe::Source.create({
                                         customer: cust_id,
                                         original_source: payment_src,
                                         usage: 'reusable'
-                                    }, stripe_account: connected_vendor_id)
+                                    }, stripe_account: vendor_stripe_id)
       # This creates a charge token - the customer MUST have a payment method
       charge = Stripe::Charge.create({
                                          amount: amount,
@@ -74,7 +84,7 @@ module CustomerMethods
                                          application_fee_amount: 5,
                                          description: charge_description,
                                          statement_descriptor: statement_descriptor
-                                     }, stripe_account: connected_vendor_id)
+                                     }, stripe_account: vendor_stripe_id)
     rescue Stripe::StripeError => e
       status 402
       return log_info("Error creating charge: #{e.message}")
