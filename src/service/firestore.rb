@@ -1,10 +1,10 @@
 require 'google/cloud/firestore'
-require '../src/model/Vendor'
+require_relative '../model/Vendor'
 
 # Module for Firebase Firestore methods
 module Firestore
 
-  # Names of our firebase datastructure
+  # Names of our firebase data structure
   VENDORS_COL_NAME = 'vendors'.freeze
   VENDOR_BACKEND_COL_NAME = 'backend'.freeze
   VENDOR_BACKEND_STRIPE_DOC_NAME = 'stripe'.freeze
