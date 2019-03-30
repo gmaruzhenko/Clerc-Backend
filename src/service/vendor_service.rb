@@ -1,7 +1,10 @@
-module VendorMethods
+require_relative 'helper_service'
 
-  def connect_standard_account (json_input , firestore)
+module VendorService
 
+  include HelperService
+
+  def connect_standard_account(json_input, firestore)
     # Check that it's not empty, otherwise continue
     halt 400, 'Invalid request - no JSON given' if json_input.empty?
 
@@ -14,9 +17,9 @@ module VendorMethods
 
     # Retrieve required fields from Stripe
     stripe_data = {
-        client_secret: STRIPE_API_SECRET,
-        code: new_account_auth,
-        grant_type: 'authorization_code'
+      client_secret: STRIPE_API_SECRET,
+      code: new_account_auth,
+      grant_type: 'authorization_code'
     }
 
     # DEBUGGING ONLY TODO REMOVE IN PROD
@@ -42,7 +45,7 @@ module VendorMethods
     new_vendor = Vendor.new(nil, new_account_name, vendor_pub_key,
                             vendor_user_id, vendor_refresh_token, vendor_access_token)
     # Save the new vendor to firebase
-    firebase_id = Firestore.save_vendor new_vendor, firestore
+    firebase_id = FirestoreService.save_vendor new_vendor, firestore
 
     log_info('Success in creating standard account!')
 
@@ -50,5 +53,4 @@ module VendorMethods
     status 201
     { firebase_id: firebase_id }.to_json
   end
-
 end

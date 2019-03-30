@@ -1,8 +1,9 @@
-require_relative '../service/firestore'
+require_relative 'firestore_service'
+require_relative 'helper_service'
 
-module CustomerMethods
+module CustomerService
 
-  include Firestore
+  include HelperService
 
   def create_customer
     begin
@@ -59,7 +60,7 @@ module CustomerMethods
     end
 
     # Try getting the Vendor object from firebase
-    vendor_from_firebase = Firestore.load_vendor firebase_vendor_id, firestore
+    vendor_from_firebase = FirestoreService.load_vendor firebase_vendor_id, firestore
     halt 400, 'Vendor ID was not found' if vendor_from_firebase.nil?
 
     vendor_stripe_id = vendor_from_firebase.stripe_user_id

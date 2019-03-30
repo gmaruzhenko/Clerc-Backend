@@ -1,4 +1,4 @@
-module HelperFunctions
+module HelperService
 
   # JSON Parameter parser for incoming response body
   def json_params

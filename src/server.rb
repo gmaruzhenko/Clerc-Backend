@@ -7,19 +7,19 @@ require 'stripe'
 require 'json'
 require 'http'
 require 'google/cloud/firestore'
-require_relative 'model/Vendor'
-require_relative 'Functions/customer_methods'
-require_relative 'Functions/helper_functions'
-require_relative 'Functions/vendor_methods'
+require_relative 'model/vendor'
+require_relative 'service/customer_service'
+require_relative 'service/helper_service'
+require_relative 'service/vendor_service'
 
 # Load environment variables for development (comment out in Prod)
 # You can download the required .env file from Google Drive. See README
 require 'dotenv'
 Dotenv.load
 
-include HelperFunctions
-include CustomerMethods
-include VendorMethods
+include HelperService
+include CustomerService
+include VendorService
 
 # Loading environment variables will likely look very different in EC2
 FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
@@ -28,7 +28,7 @@ STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 Stripe.api_key = STRIPE_API_SECRET
 
 firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
-puts 'Firestore client initialized'
+puts 'FirestoreService client initialized'
 
 # Our secret api key for logging customers in our account (comment to switch accounts during debugging)
 # Account name = Test1
