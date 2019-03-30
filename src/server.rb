@@ -8,18 +8,18 @@ require 'json'
 require 'http'
 require 'google/cloud/firestore'
 require_relative 'model/vendor'
-require_relative 'service/customer_service'
-require_relative 'service/helper_service'
-require_relative 'service/vendor_service'
+require_relative 'endpoints/customer_endpoints'
+require_relative 'endpoints/endpoint_helper'
+require_relative 'endpoints/vendor_endpoints'
 
 # Load environment variables for development (comment out in Prod)
 # You can download the required .env file from Google Drive. See README
 require 'dotenv'
 Dotenv.load
 
-include HelperService
-include CustomerService
-include VendorService
+include EndpointHelper
+include CustomerEndpoints
+include VendorEndpoints
 
 # Loading environment variables will likely look very different in EC2
 FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
@@ -28,7 +28,7 @@ STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 Stripe.api_key = STRIPE_API_SECRET
 
 firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
-puts 'FirestoreService client initialized'
+puts 'Firestore client initialized'
 
 # Our secret api key for logging customers in our account (comment to switch accounts during debugging)
 # Account name = Test1
@@ -74,7 +74,7 @@ end
 # @param = customer_id
 # @return = json stripe ephemeral key object
 post '/customers/create-ephemeral-key' do
-  return create_ephemeral_key json_params
+  return create_ephemeral_key parse_json_params
 end
 
 # Creates a charge on a stripe connected account
@@ -84,7 +84,7 @@ end
 # @param = source
 # @return = stripe charge id
 post '/charge' do
-  return charge(json_params, firestore)
+  return charge(parse_json_params, firestore)
 end
 
 # This is called by front-end once the connected account is authorized
@@ -94,5 +94,5 @@ end
 # @param = account_auth_code
 # @param = vendor_name
 post('/vendors/connect-standard-account') do
-  return connect_standard_account(json_params, firestore)
+  return connect_standard_account(parse_json_params, firestore)
 end

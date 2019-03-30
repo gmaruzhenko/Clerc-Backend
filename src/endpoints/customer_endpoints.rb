@@ -1,9 +1,11 @@
-require_relative 'firestore_service'
-require_relative 'helper_service'
+require_relative '../service/firestore_service'
+require_relative 'endpoint_helper'
+require_relative '../util'
 
-module CustomerService
+module CustomerEndpoints
 
-  include HelperService
+  include EndpointHelper
+  include Util
 
   def create_customer
     begin
@@ -59,8 +61,11 @@ module CustomerService
       statement_descriptor = ''
     end
 
+    # Get firestore service
+    firestore_service = FirestoreService.new(firestore)
+
     # Try getting the Vendor object from firebase
-    vendor_from_firebase = FirestoreService.load_vendor firebase_vendor_id, firestore
+    vendor_from_firebase = firestore_service.load_vendor firebase_vendor_id
     halt 400, 'Vendor ID was not found' if vendor_from_firebase.nil?
 
     vendor_stripe_id = vendor_from_firebase.stripe_user_id
@@ -76,7 +81,6 @@ module CustomerService
                                        amount: amount,
                                        currency: 'cad',
                                        source: token.id,
-                                       # TODO: fill the below in from additional params
                                        application_fee_amount: 5,
                                        description: charge_description,
                                        statement_descriptor: statement_descriptor

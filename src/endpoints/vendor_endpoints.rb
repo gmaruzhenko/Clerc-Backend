@@ -1,10 +1,17 @@
-require_relative 'helper_service'
+require_relative 'endpoint_helper'
+require_relative '../util'
+require_relative '../service/firestore_service'
 
-module VendorService
+module VendorEndpoints
 
-  include HelperService
+  include EndpointHelper
+  include Util
 
   def connect_standard_account(json_input, firestore)
+
+    # Get firestore service TODO use as an instance variable?
+    firestore_service = FirestoreService.new(firestore)
+
     # Check that it's not empty, otherwise continue
     halt 400, 'Invalid request - no JSON given' if json_input.empty?
 
@@ -45,12 +52,13 @@ module VendorService
     new_vendor = Vendor.new(nil, new_account_name, vendor_pub_key,
                             vendor_user_id, vendor_refresh_token, vendor_access_token)
     # Save the new vendor to firebase
-    firebase_id = FirestoreService.save_vendor new_vendor, firestore
+    firebase_id = firestore_service.save_vendor new_vendor
 
-    log_info('Success in creating standard account!')
+    log_info 'Success in creating standard account!'
 
     # Return the firebase ID
     status 201
     { firebase_id: firebase_id }.to_json
   end
+
 end
