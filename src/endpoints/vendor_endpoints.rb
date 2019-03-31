@@ -2,15 +2,17 @@ require_relative 'endpoint_helper'
 require_relative '../util'
 require_relative '../service/firestore_service'
 
+# Module to hold logic for all vendor related endpoints
 module VendorEndpoints
-
   include EndpointHelper
   include Util
 
+  #
+  # Connects a standard stripe retailer account with our system
+  #
   def connect_standard_account(json_input, firestore)
-
-    # Get firestore service TODO use as an instance variable?
-    firestore_service = FirestoreService.new(firestore)
+    # Get the firebase service
+    firestore_service = FirestoreService.new firestore
 
     # Check that it's not empty, otherwise continue
     halt 400, 'Invalid request - no JSON given' if json_input.empty?
@@ -29,18 +31,18 @@ module VendorEndpoints
       grant_type: 'authorization_code'
     }
 
-    # DEBUGGING ONLY TODO REMOVE IN PROD
-    log_info "Data passed to stripe: #{stripe_data.to_json}"
+    # DEBUGGING ONLY
+    # log_info "Data passed to stripe: #{stripe_data.to_json}"
 
     # Make request to Stripe
     stripe_response = HTTP.post(STRIPE_CONNECTED_ACCT_URL,
                                 form: stripe_data)
 
-    # DEBUGGING ONLY TODO REMOVE IN PROD
-    log_info "Stripe response body: #{stripe_response.body}"
+    # DEBUGGING ONLY
+    # log_info "Stripe response body: #{stripe_response.body}"
 
     # Check that we have a returned success
-    halt 400, 'Stripe call was unsuccessful. Please check input parameters' if stripe_response.code != 200
+    return_error 400, 'API Call to Stripe Failed' if stripe_response.code != 200
 
     # Response is valid, store information specific to the retailer in firestore
     stripe_response_body = JSON.parse(stripe_response.body)
@@ -60,5 +62,4 @@ module VendorEndpoints
     status 201
     { firebase_id: firebase_id }.to_json
   end
-
 end

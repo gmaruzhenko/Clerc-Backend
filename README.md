@@ -10,20 +10,41 @@
 
 ##### Base URL
 http://34.217.14.89:4567
-##### Extensions
-GET
 
-    /
+1. ```GET /```
+    - Test Endpoint
+    - Expected Output: ```Connection Successful```
 
+##### Customer Endpoints
 
-    /make_customer
-POST
+1. ```GET /customers/create```
+    - Creates empty, new customer
+    - Input: None
+    - Expected Output: ```{"customer_id": "cus_EngWBBKckHWUT2"}```
 
-    /charge
-    Json Params Required = amount , customer_id , CONNECTED_STRIPE_ACCOUNT_ID
+2. ```POST /customers/create-ephemeral-key```
+    - Creates short-lived auth key for customer
+    - Input (JSON Body): ```{
+                  "customer_id": "cus_Eki4HaYdTlXbfc",
+                  "stripe_version": "2019-03-14"
+                }```
+    - Expected Output: Ephemeral key object from stripe
+
+3. ```POST /charge```
+    - Charges a customer with a vendor
+    - Input (JSON Body): ```{
+                              "customer_id": "cus_Eki4HaYdTlXbfc",
+                              "firebase_vendor_id": "9cMpS9XfzJUSFXskuAEb",
+                              "amount": 1000,
+                              "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI"
+                            }```
+    - Expected Output: ```{"charge_id":"ch_1EK5GMF8Tv70HUiaZtuylq6c"}```
     
-    /create-standard-account
-    Json Params Required = account_auth_code
+##### Vendor Endpoints
+
+4. ```POST /vendors/connect-standard-account```
+    - Initializes a new vendor & saves to firebase
+    - Don't test this programmatically for now
     
 ### Operation
 0. FOR LOCAL DEVELOPMENT: Place .env file (located in Clerc's Google Drive/Code/Keys/.env) in src
