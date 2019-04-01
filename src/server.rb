@@ -7,19 +7,19 @@ require 'stripe'
 require 'json'
 require 'http'
 require 'google/cloud/firestore'
-require '../src/Model/Vendor'
-require '../src/Service/firestore'
-require '../src/Functions/customer_methods'
-require '../src/Functions/helper_functions'
-require '../src/Functions/vendor_methods'
+require_relative 'model/vendor'
+require_relative 'endpoints/customer_endpoints'
+require_relative 'endpoints/endpoint_helper'
+require_relative 'endpoints/vendor_endpoints'
 
-include HelperFunctions
-include CustomerMethods
-include VendorMethods
 # Load environment variables for development (comment out in Prod)
 # You can download the required .env file from Google Drive. See README
 require 'dotenv'
 Dotenv.load
+
+include EndpointHelper
+include CustomerEndpoints
+include VendorEndpoints
 
 # Loading environment variables will likely look very different in EC2
 FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
@@ -49,10 +49,10 @@ before do
   response.headers['Access-Control-Allow-Origin'] = '*'
 end
 
-options "*" do
-  response.headers["Allow"] = "GET, PUT, POST, DELETE, OPTIONS"
-  response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept, X-User-Email, X-Auth-Token"
-  response.headers["Access-Control-Allow-Origin"] = "*"
+options '*' do
+  response.headers['Allow'] = 'GET, PUT, POST, DELETE, OPTIONS'
+  response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-User-Email, X-Auth-Token'
+  response.headers['Access-Control-Allow-Origin'] = '*'
   200
 end
 
@@ -74,7 +74,7 @@ end
 # @param = customer_id
 # @return = json stripe ephemeral key object
 post '/customers/create-ephemeral-key' do
-  return create_ephemeral_key (json_params)
+  return create_ephemeral_key parse_json_params
 end
 
 # Creates a charge on a stripe connected account
@@ -84,7 +84,7 @@ end
 # @param = source
 # @return = stripe charge id
 post '/charge' do
-  return charge(json_params)
+  return charge(parse_json_params, firestore)
 end
 
 # This is called by front-end once the connected account is authorized
@@ -94,5 +94,5 @@ end
 # @param = account_auth_code
 # @param = vendor_name
 post('/vendors/connect-standard-account') do
-  return connect_standard_account(json_params , firestore)
+  return connect_standard_account(parse_json_params, firestore)
 end

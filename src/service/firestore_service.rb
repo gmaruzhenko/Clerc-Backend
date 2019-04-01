@@ -1,31 +1,39 @@
 require 'google/cloud/firestore'
-require '../src/model/Vendor'
+require_relative '../model/vendor'
+require_relative '../util'
 
-# Module for Firebase Firestore methods
-module Firestore
+# Module for Firebase Firestore Service methods
+class FirestoreService
 
-  # Names of our firebase datastructure
+  include Util
+
+  # Names of our firebase data structure
   VENDORS_COL_NAME = 'vendors'.freeze
   VENDOR_BACKEND_COL_NAME = 'backend'.freeze
   VENDOR_BACKEND_STRIPE_DOC_NAME = 'stripe'.freeze
 
-  #
+  @firestore
+
+  # Constructor
+  def initialize(firestore)
+    @firestore = firestore
+  end
+
   # Saves a vendor to firestore and returns the firestore ID
   #
   # @param [Vendor] vendor to save
-  # @param [Object] firestore initialized firestore object
   # @return [String] firestore id if successfully saved
-  def self.save_vendor(vendor, firestore)
+  def save_vendor(vendor)
     # Reference to the vendors collection
-    vendors_ref = firestore.col VENDORS_COL_NAME
+    vendors_ref = @firestore.col VENDORS_COL_NAME
     basic_vendor_data = {
       name: vendor.name
     }
-    puts "Saving vendor: #{vendor.name}"
+    log_info "Saving vendor: #{vendor.name}"
 
     added_vendor_ref = vendors_ref.doc
     added_vendor_ref.set basic_vendor_data
-    puts "Successfully saved vendor #{vendor.name}
+    log_info "Successfully saved vendor #{vendor.name}
           with ID: #{added_vendor_ref.document_id}."
 
     # Now save all the stripe information
@@ -38,7 +46,7 @@ module Firestore
       stripe_access_token: vendor.stripe_access_token
     }
     vendor_stripe_ref.set stripe_data
-    puts 'Successfully saved vendor Stripe data'
+    log_info 'Successfully saved vendor Stripe data'
 
     # Return the firebase ID
     added_vendor_ref.document_id
@@ -49,19 +57,18 @@ module Firestore
   # Returns nil if the vendor does not exist
   #
   # @param [String] id - firestore id for the vendor
-  # @param [Object] firestore - initialized firestore object
   # @return [Vendor] - a vendor object or nil if not found
-  def self.load_vendor(id, firestore)
+  def load_vendor(id)
 
     vendor_id = id
 
     # First get the main document - if this exists then the vendor exists
-    vendor_main_doc_ref  = firestore.doc "#{VENDORS_COL_NAME}/#{vendor_id}"
+    vendor_main_doc_ref  = @firestore.doc "#{VENDORS_COL_NAME}/#{vendor_id}"
     vendor_main_doc = vendor_main_doc_ref.get
     if vendor_main_doc.exists?
       vendor_name = vendor_main_doc.data[:name]
     else
-      puts "Vendor with id #{vendor_id} does not exist"
+      log_info "Vendor with id #{vendor_id} does not exist"
       return nil
     end
 
@@ -76,7 +83,7 @@ module Firestore
       vendor_str_ref_tok = stripe_data[:stripe_refresh_token]
       vendor_str_acc_tok = stripe_data[:stripe_access_token]
     else
-      puts "Vendor with id #{vendor_id} does not have Stripe info"
+      log_info "Vendor with id #{vendor_id} does not have Stripe info"
       return nil
     end
 
