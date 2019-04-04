@@ -16,6 +16,10 @@ echo "
 "
 
 
+#In Https
+#curl --cacert localhost.cert -X GET https://localhost:4000/
+
+
 
 
 
