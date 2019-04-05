@@ -19,9 +19,49 @@ require 'webrick/https'
 require 'openssl'
 
 
-class MyServer  < Sinatra::Base
+
+class ClercServer  < Sinatra::Base
+  include EndpointHelper
+
+# Test endpoint to check if server is up
   get '/' do
-    "Hellow, world!"
+    status 200
+    return log_info("Connection Successful\n")
+  end
+
+# Create a customer in our platform account
+# @param = nil
+# @return = json stripe customer object
+  get '/customers/create' do
+    return create_customer
+  end
+
+# generates temp key for ios
+# @param = stripe_version
+# @param = customer_id
+# @return = json stripe ephemeral key object
+  post '/customers/create-ephemeral-key' do
+    return create_ephemeral_key parse_json_params
+  end
+
+# Creates a charge on a stripe connected account
+# @param = customer_id
+# @param = CONNECTED_STRIPE_ACCOUNT_ID
+# @param = amount
+# @param = source
+# @return = stripe charge id
+  post '/charge' do
+    return charge(parse_json_params, firestore)
+  end
+
+# This is called by front-end once the connected account is authorized
+# Once the business gives us authorization, frontend will receive a code
+# which is then passed to this method through a backend call.
+# We will use the AUTHORIZATION_CODE to retrieve credentials for the business
+# @param = account_auth_code
+# @param = vendor_name
+  post('/vendors/connect-standard-account') do
+    return connect_standard_account(parse_json_params, firestore)
   end
 end
 
@@ -36,7 +76,7 @@ webrick_options = {
     :SSLCertificate     => OpenSSL::X509::Certificate.new(  File.open(File.join(CERT_PATH, "localhost.cert")).read),
     :SSLPrivateKey      => OpenSSL::PKey::RSA.new(          File.open(File.join(CERT_PATH, "localhost.key")).read),
     :SSLCertName        => [ [ "CN",WEBrick::Utils::getservername ] ],
-    :app                => MyServer
+    :app                => ClercServer
 
 }
 
@@ -87,43 +127,4 @@ options '*' do
   200
 end
 
-# Test endpoint to check if server is up
-get '/' do
-  status 200
-  return log_info("Connection Successful\n")
-end
 
-# Create a customer in our platform account
-# @param = nil
-# @return = json stripe customer object
-get '/customers/create' do
-  return create_customer
-end
-
-# generates temp key for ios
-# @param = stripe_version
-# @param = customer_id
-# @return = json stripe ephemeral key object
-post '/customers/create-ephemeral-key' do
-  return create_ephemeral_key parse_json_params
-end
-
-# Creates a charge on a stripe connected account
-# @param = customer_id
-# @param = CONNECTED_STRIPE_ACCOUNT_ID
-# @param = amount
-# @param = source
-# @return = stripe charge id
-post '/charge' do
-  return charge(parse_json_params, firestore)
-end
-
-# This is called by front-end once the connected account is authorized
-# Once the business gives us authorization, frontend will receive a code
-# which is then passed to this method through a backend call.
-# We will use the AUTHORIZATION_CODE to retrieve credentials for the business
-# @param = account_auth_code
-# @param = vendor_name
-post('/vendors/connect-standard-account') do
-  return connect_standard_account(parse_json_params, firestore)
-end
