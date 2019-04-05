@@ -20,8 +20,60 @@ require 'openssl'
 
 
 
+# Our secret api key for logging customers in our account (comment to switch accounts during debugging)
+# Account name = Test1
+# Stripe.api_key = "sk_test_dUndr7GHsaxgYD9o9jxn6Kmy"
+# Account name = Sample
+# Stripe.api_key = "sk_test_dsoNrcwd0QnNHt8znIVNpCJK"
+
+# configure to run as server
+# for local testing comment out line below
+# set :bind, '0.0.0.0'
+#
+# CORS
+configure do
+  enable :cross_origin
+end
+
+before do
+  response.headers['Access-Control-Allow-Origin'] = '*'
+end
+
+options '*' do
+  response.headers['Allow'] = 'GET, PUT, POST, DELETE, OPTIONS'
+  response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-User-Email, X-Auth-Token'
+  response.headers['Access-Control-Allow-Origin'] = '*'
+  200
+end
+
 class ClercServer  < Sinatra::Base
+
+  # Load environment variables for development (comment out in Prod)
+  # You can download the required .env file from Google Drive. See README
+  require 'dotenv'
+  Dotenv.load
+
+
+
   include EndpointHelper
+  include CustomerEndpoints
+  include VendorEndpoints
+  include Util
+
+# Loading environment variables will likely look very different in EC2
+  #FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
+  #STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
+  STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
+  GOOGLE_APPLICATION_CREDENTIALS="../Clerc-2040e3a661c9.json"
+  STRIPE_API_SECRET="sk_test_dsoNrcwd0QnNHt8znIVNpCJK"
+  FIREBASE_PROJ_ID="paywithclerc"
+
+
+  Stripe.api_key = STRIPE_API_SECRET
+
+
+  firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
+  puts 'Firestore client initialized'
 
 # Test endpoint to check if server is up
   get '/' do
@@ -81,50 +133,3 @@ webrick_options = {
 }
 
 Rack::Server.start webrick_options
-
-
-# Load environment variables for development (comment out in Prod)
-# You can download the required .env file from Google Drive. See README
-require 'dotenv'
-Dotenv.load
-
-include EndpointHelper
-include CustomerEndpoints
-include VendorEndpoints
-
-# Loading environment variables will likely look very different in EC2
-FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
-STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
-STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
-Stripe.api_key = STRIPE_API_SECRET
-
-firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
-puts 'Firestore client initialized'
-
-# Our secret api key for logging customers in our account (comment to switch accounts during debugging)
-# Account name = Test1
-# Stripe.api_key = "sk_test_dUndr7GHsaxgYD9o9jxn6Kmy"
-# Account name = Sample
-# Stripe.api_key = "sk_test_dsoNrcwd0QnNHt8znIVNpCJK"
-
-# configure to run as server
-# for local testing comment out line below
-# set :bind, '0.0.0.0'
-#
-# CORS
-configure do
-  enable :cross_origin
-end
-
-before do
-  response.headers['Access-Control-Allow-Origin'] = '*'
-end
-
-options '*' do
-  response.headers['Allow'] = 'GET, PUT, POST, DELETE, OPTIONS'
-  response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-User-Email, X-Auth-Token'
-  response.headers['Access-Control-Allow-Origin'] = '*'
-  200
-end
-
-
