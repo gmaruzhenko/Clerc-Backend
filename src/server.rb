@@ -79,16 +79,21 @@ class ClercServer  < Sinatra::Base
     return log_info("Connection Successful\n")
   end
 
-  get '/jwt' do
+  get '/jwt/generate' do
     # expire 2 minutes from now
-    token = JsonWebToken.encode({ :hello => 'world' }, Time.now.to_i + 120)
-    puts token # eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIiwiZXhwIjoxNDY4Njg3OTc1fQ.NhIsdEa0Q7Wl5Dx6kyJvSZY6E8ViJ5Kooo7rKr2OBPg
-    puts JsonWebToken.decode(token) # {"hello"=>"world", "exp"=>1468687975}
+    token = JsonWebToken.encode({ :hello => 'world' }, Time.now.to_i + 30)
+    #puts token # eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIiwiZXhwIjoxNDY4Njg3OTc1fQ.NhIsdEa0Q7Wl5Dx6kyJvSZY6E8ViJ5Kooo7rKr2OBPg
+    #puts JsonWebToken.decode(token) # {"hello"=>"world", "exp"=>1468687975}
+    return token.to_json
+  end
 
-# expire 2 minutes ago
-    token = JsonWebToken.encode({ :hello => 'world' }, Time.now.to_i - 120)
-    puts token # eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIiwiZXhwIjoxNDY4Njg3NzM1fQ.kDD_WWN3ZTTdFXQvYEgm1CgDaE1mEZxjMvQkQEq4HX8
-    puts JsonWebToken.decode(token) # FAILED
+  post '/jwt/validate' do
+    json_input = parse_json_params
+    puts json_input
+    token = json_input['token']
+    decoded_jwt = JsonWebToken.decode(token)
+    puts decoded_jwt.to_s
+    return decoded_jwt.to_json
   end
 
 # Create a customer in our platform account

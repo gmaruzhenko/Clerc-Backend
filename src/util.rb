@@ -11,11 +11,11 @@ module Util
 
     def self.encode(payload, expiration)
       payload[:exp] = expiration
-      JWT.encode(payload, File.open(File.join(CERT_PATH, "localhost.key")).read)
+      JWT.encode(payload, File.open(File.join(CERT_PATH, "clerc_jwt_fast.key")).read)
     end
 
     def self.decode(token)
-      return JWT.decode(token, File.open(File.join(CERT_PATH, "localhost.key")).read)[0]
+      return JWT.decode(token, File.open(File.join(CERT_PATH, "clerc_jwt_fast.key")).read)[0]
     rescue
       'FAILED'
     end
