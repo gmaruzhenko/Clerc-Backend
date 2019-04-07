@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+
+# THIS IS NOW OUTDATED AND WILL NOT WORK WITH HTTPS
 #feel free to comment out tests for convenience
 echo "Test connection "
 curl -X GET http://localhost:4567/
