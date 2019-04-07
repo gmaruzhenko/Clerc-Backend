@@ -7,6 +7,7 @@ require 'stripe'
 require 'json'
 require 'http'
 require 'google/cloud/firestore'
+require 'jwt'
 require_relative 'model/vendor'
 require_relative 'endpoints/customer_endpoints'
 require_relative 'endpoints/endpoint_helper'
@@ -76,6 +77,19 @@ class ClercServer  < Sinatra::Base
   get '/' do
     status 200
     return log_info("Connection Successful\n")
+  end
+
+  get '/jwt' do
+    # expire 2 minutes from now
+    token = JsonWebToken.encode({ :hello => 'world' }, Time.now.to_i + 120)
+    puts token # eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIiwiZXhwIjoxNDY4Njg3OTc1fQ.NhIsdEa0Q7Wl5Dx6kyJvSZY6E8ViJ5Kooo7rKr2OBPg
+    puts JsonWebToken.decode(token) # {"hello"=>"world", "exp"=>1468687975}
+    puts "ffffffffffffffffffffffffffffffffffffffffffffff"
+
+# expire 2 minutes ago
+    token = JsonWebToken.encode({ :hello => 'world' }, Time.now.to_i - 120)
+    puts token # eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIiwiZXhwIjoxNDY4Njg3NzM1fQ.kDD_WWN3ZTTdFXQvYEgm1CgDaE1mEZxjMvQkQEq4HX8
+    puts JsonWebToken.decode(token) # FAILED
   end
 
 # Create a customer in our platform account
