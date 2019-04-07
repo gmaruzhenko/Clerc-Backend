@@ -4,8 +4,13 @@ require_relative '../service/firestore_service'
 
 # Module to hold logic for all vendor related endpoints
 module VendorEndpoints
+
   include EndpointHelper
   include Util
+  STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
+  Stripe.api_key = STRIPE_API_SECRET
+  STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
+
 
   #
   # Connects a standard stripe retailer account with our system
@@ -32,7 +37,7 @@ module VendorEndpoints
     }
 
     # DEBUGGING ONLY
-    # log_info "Data passed to stripe: #{stripe_data.to_json}"
+    # puts "Data passed to stripe: #{stripe_data.to_json}"
 
     # Make request to Stripe
     stripe_response = HTTP.post(STRIPE_CONNECTED_ACCT_URL,

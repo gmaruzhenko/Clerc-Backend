@@ -15,7 +15,6 @@ curl -d '{"account_auth_code":"ac_Em0BNEqBqTW3KMc5jaJW38HL5E1KjlhC","vendor_name
 echo "
 "
 
-
 #In Https
 #curl --cacert localhost.cert -X GET https://localhost:4000/
 

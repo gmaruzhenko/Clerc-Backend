@@ -61,12 +61,9 @@ class ClercServer  < Sinatra::Base
   include Util
 
 # Loading environment variables will likely look very different in EC2
-  #FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
-  #STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
+  FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
+  STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
   STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
-  GOOGLE_APPLICATION_CREDENTIALS="../Clerc-2040e3a661c9.json"
-  STRIPE_API_SECRET="sk_test_dsoNrcwd0QnNHt8znIVNpCJK"
-  FIREBASE_PROJ_ID="paywithclerc"
 
 
   Stripe.api_key = STRIPE_API_SECRET
@@ -117,6 +114,7 @@ class ClercServer  < Sinatra::Base
   end
 end
 
+#Place key and cert in the directory of this script
 CERT_PATH = Dir.pwd
 
 webrick_options = {
