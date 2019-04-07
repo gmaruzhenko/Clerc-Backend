@@ -55,7 +55,7 @@ http://34.217.14.89:4567
 ```ssh -i "mvp-1.pem" ubuntu@ec2-34-217-14-89.us-west-2.compute.amazonaws.com```
 2. Run server
 ```ruby server.rb```
-3. You can now run the following:
+3. You can now run the following:   
 - Test connection:
 
 ```curl -X GET http://34.217.14.89:4567/```

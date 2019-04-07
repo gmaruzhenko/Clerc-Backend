@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+
+# THIS IS NOW OUTDATED AND WILL NOT WORK WITH HTTPS
 #feel free to comment out tests for convenience
 echo "Test connection "
 curl -X GET http://localhost:4567/
@@ -14,6 +16,9 @@ Create standard account"
 curl -d '{"account_auth_code":"ac_Em0BNEqBqTW3KMc5jaJW38HL5E1KjlhC","vendor_name":"test-store-123"}' -H "Content-Type: application/json" -X POST http://localhost:4567/vendors/connect-standard-account
 echo "
 "
+
+#In Https
+#curl --cacert localhost.cert -X GET https://localhost:4000/
 
 
 
