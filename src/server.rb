@@ -84,7 +84,6 @@ class ClercServer  < Sinatra::Base
     token = JsonWebToken.encode({ :hello => 'world' }, Time.now.to_i + 120)
     puts token # eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIiwiZXhwIjoxNDY4Njg3OTc1fQ.NhIsdEa0Q7Wl5Dx6kyJvSZY6E8ViJ5Kooo7rKr2OBPg
     puts JsonWebToken.decode(token) # {"hello"=>"world", "exp"=>1468687975}
-    puts "ffffffffffffffffffffffffffffffffffffffffffffff"
 
 # expire 2 minutes ago
     token = JsonWebToken.encode({ :hello => 'world' }, Time.now.to_i - 120)
