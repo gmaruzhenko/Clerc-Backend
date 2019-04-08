@@ -100,3 +100,10 @@ IMPORTANT: Set environment variable for Google Firestore as defined here: https:
 ```ps aux | grep ruby```
 2. Tail to get logs of process with pid (ex <pid> = 8381):
 ````tail -f /proc/<pid>/fd/1````
+
+### Certs 
+#### Https generating:
+
+    openssl genrsa 2048 > host.key
+    chmod 400 host.key
+    openssl req -new -x509 -nodes -sha256 -days 365 -key host.key -out host.cert
