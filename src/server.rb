@@ -79,11 +79,9 @@ class ClercServer  < Sinatra::Base
     return log_info("Connection Successful\n")
   end
 
-  get '/jwt/generate' do
-    # expire 2 minutes from now
-    token = JsonWebToken.encode({ :hello => 'world' }, Time.now.to_i + 30)
-    #puts token # eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIiwiZXhwIjoxNDY4Njg3OTc1fQ.NhIsdEa0Q7Wl5Dx6kyJvSZY6E8ViJ5Kooo7rKr2OBPg
-    #puts JsonWebToken.decode(token) # {"hello"=>"world", "exp"=>1468687975}
+  post '/jwt/generate' do
+    # expire 30 sec from now
+    token = JsonWebToken.encode(parse_json_params, Time.now.to_i + 30)
     return token.to_json
   end
 
