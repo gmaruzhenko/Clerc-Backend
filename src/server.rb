@@ -127,6 +127,7 @@ webrick_options = {
     :SSLPrivateKey      => OpenSSL::PKey::RSA.new(          File.open(File.join(CERT_PATH, "localhost.key")).read),
     :SSLCertName        => [ [ "CN",WEBrick::Utils::getservername ] ],
     :app                => ClercServer,
+    :cross_origin       => true
     #comment out below for server deployment
     #:Host               => '0.0.0.0'
 
