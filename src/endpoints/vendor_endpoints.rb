@@ -7,6 +7,11 @@ module VendorEndpoints
 
   include EndpointHelper
   include Util
+
+  # Load environment variables
+  require 'dotenv'
+  Dotenv.load
+
   STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
   Stripe.api_key = STRIPE_API_SECRET
   STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze

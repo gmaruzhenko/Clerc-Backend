@@ -29,20 +29,10 @@ require_relative 'service/firestore_service'
 set port: 9999
 #set logging: true
 # CORS
-configure do
-  enable :cross_origin
-end
-
-before do
-  response.headers['Access-Control-Allow-Origin'] = '*'
-end
-
-options '*' do
-  response.headers['Allow'] = 'GET, PUT, POST, DELETE, OPTIONS'
-  response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept, X-User-Email, X-Auth-Token'
-  response.headers['Access-Control-Allow-Origin'] = '*'
-  200
-end
+require 'sinatra/cors'
+set :allow_origin, '*'
+set :allow_methods, 'GET,POST'
+set :allow_headers, 'content-type,access-control-allow-origin'
 
 # Load environment variables for development (comment out in Prod)
 # You can download the required .env file from Google Drive. See README
@@ -63,7 +53,6 @@ STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 CERT_PATH = Dir.pwd
 
 Stripe.api_key = STRIPE_API_SECRET
-
 
 firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
 puts 'Firestore client initialized'
