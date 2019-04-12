@@ -12,6 +12,10 @@ module VendorEndpoints
   STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 
 
+  DEFAULT_TXN_FEE_BASE = 0.0
+  DEFAULT_TXN_FEE_PERCENT = 0.0
+  DEFAULT_CURRENCY = 'cad'.freeze
+
   #
   # Connects a standard stripe retailer account with our system
   #
@@ -23,11 +27,12 @@ module VendorEndpoints
     halt 400, 'Invalid request - no JSON given' if json_input.empty?
 
     new_account_auth = json_input['account_auth_code']
-    new_account_name = json_input['vendor_name']
+    vendor_id = json_input['vendor_id']
+    new_store_name = json_input['store_name']
 
     # Check that parameters are given
     halt 400, 'Invalid request - missing fields' if
-        new_account_auth.nil? || new_account_name.nil?
+        new_account_auth.nil? || new_store_name.nil?
 
     # Retrieve required fields from Stripe
     stripe_data = {
@@ -51,15 +56,16 @@ module VendorEndpoints
 
     # Response is valid, store information specific to the retailer in firestore
     stripe_response_body = JSON.parse(stripe_response.body)
-    vendor_pub_key = stripe_response_body['stripe_publishable_key']
-    vendor_user_id = stripe_response_body['stripe_user_id']
-    vendor_refresh_token = stripe_response_body['refresh_token']
-    vendor_access_token = stripe_response_body['access_token']
+    store_pub_key = stripe_response_body['stripe_publishable_key']
+    store_user_id = stripe_response_body['stripe_user_id']
+    store_refresh_token = stripe_response_body['refresh_token']
+    store_access_token = stripe_response_body['access_token']
     # Construct the vendor object
-    new_vendor = Vendor.new(nil, new_account_name, vendor_pub_key,
-                            vendor_user_id, vendor_refresh_token, vendor_access_token)
+    new_store = Store.new(nil, new_store_name, store_pub_key,
+                          store_user_id, store_refresh_token, store_access_token,
+                          DEFAULT_TXN_FEE_BASE, DEFAULT_TXN_FEE_PERCENT, DEFAULT_CURRENCY)
     # Save the new vendor to firebase
-    firebase_id = firestore_service.save_vendor new_vendor
+    firebase_id = firestore_service.save_store new_store, vendor_id
 
     log_info 'Success in creating standard account!'
 
