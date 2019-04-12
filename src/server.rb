@@ -59,6 +59,8 @@ FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
 STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
 STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 
+#Place key and cert in the directory of this script
+CERT_PATH = Dir.pwd
 
 Stripe.api_key = STRIPE_API_SECRET
 
@@ -114,6 +116,4 @@ end
 post('/vendors/connect-standard-account') do
   return connect_standard_account(jwt_handler(parse_json_params), firestore)
 end
-
-
 
