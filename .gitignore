@@ -17,6 +17,9 @@
 !.vscode/extensions.json
 Clerc-2040e3a661c9.json
 **/.env
+**/.key
+**/.cert
+**/.pub
 
 # Ignore Byebug command history file.
 .byebug_history
