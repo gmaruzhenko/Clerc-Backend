@@ -1,5 +1,5 @@
 require 'google/cloud/firestore'
-require_relative '../model/vendor'
+require_relative '../model/store'
 require_relative '../util'
 
 # Module for Firebase Firestore Service methods
@@ -8,9 +8,11 @@ class FirestoreService
   include Util
 
   # Names of our firebase data structure
+  STORES_COL_NAME = 'stores'.freeze
   VENDORS_COL_NAME = 'vendors'.freeze
-  VENDOR_BACKEND_COL_NAME = 'backend'.freeze
-  VENDOR_BACKEND_STRIPE_DOC_NAME = 'stripe'.freeze
+  VENDOR_STORES_PROP = 'stores'.freeze
+  STORE_BACKEND_COL_NAME = 'backend'.freeze
+  STORE_BACKEND_STRIPE_DOC_NAME = 'stripe'.freeze
 
   @firestore
 
@@ -19,76 +21,99 @@ class FirestoreService
     @firestore = firestore
   end
 
-  # Saves a vendor to firestore and returns the firestore ID
+  # Saves a store to firestore and returns the firestore ID for the store
+  # Will also add the store to the "stores" field of the owner vendor
   #
-  # @param [Vendor] vendor to save
+  # @param [Store] store to save
   # @return [String] firestore id if successfully saved
-  def save_vendor(vendor)
-    # Reference to the vendors collection
-    vendors_ref = @firestore.col VENDORS_COL_NAME
-    basic_vendor_data = {
-      name: vendor.name
-    }
-    log_info "Saving vendor: #{vendor.name}"
+  def save_store(store, vendor_id)
 
-    added_vendor_ref = vendors_ref.doc
-    added_vendor_ref.set basic_vendor_data
-    log_info "Successfully saved vendor #{vendor.name}
-          with ID: #{added_vendor_ref.document_id}."
+    # Reference to the stores collection
+    stores_ref = @firestore.col STORES_COL_NAME
+    basic_store_data = {
+      name: store.name,
+      default_currency: store.default_currency,
+      parent_vendor_id: vendor_id
+    }
+    log_info "Saving store: #{store.name}"
+
+    added_store_ref = stores_ref.doc
+    added_store_ref.set basic_store_data
+    log_info "Successfully saved store #{store.name}
+          with ID: #{added_store_ref.document_id}."
 
     # Now save all the stripe information
-    vendor_stripe_ref = added_vendor_ref.col(VENDOR_BACKEND_COL_NAME)
-                                        .doc(VENDOR_BACKEND_STRIPE_DOC_NAME)
+    store_stripe_ref = added_store_ref.col(STORE_BACKEND_COL_NAME)
+                                      .doc(STORE_BACKEND_STRIPE_DOC_NAME)
     stripe_data = {
-      stripe_publishable_key: vendor.stripe_publishable_key,
-      stripe_user_id: vendor.stripe_user_id,
-      stripe_refresh_token: vendor.stripe_refresh_token,
-      stripe_access_token: vendor.stripe_access_token
+      stripe_publishable_key: store.stripe_publishable_key,
+      stripe_user_id: store.stripe_user_id,
+      stripe_refresh_token: store.stripe_refresh_token,
+      stripe_access_token: store.stripe_access_token,
+      txn_fee_base: store.txn_fee_base,
+      txn_fee_percent: store.txn_fee_percent
     }
-    vendor_stripe_ref.set stripe_data
-    log_info 'Successfully saved vendor Stripe data'
+    store_stripe_ref.set stripe_data
+    log_info 'Successfully saved store Stripe data'
+
+    store_firebase_id = added_store_ref.document_id
+
+    # Now save the store ID to the vendor
+    # TODO we should use batch writes for this
+    # TODO this will overwrite the existing array - when we support multiple stores, deal with this.
+    @firestore.col(VENDORS_COL_NAME)
+              .doc(vendor_id)
+              .update(
+                Hash[VENDOR_STORES_PROP, [store_firebase_id]]
+              )
+
+    log_info 'Successfully updated vendor with store ID'
 
     # Return the firebase ID
-    added_vendor_ref.document_id
+    store_firebase_id
   end
 
   #
-  # Loads and returns a vendor from firestore with the given ID
-  # Returns nil if the vendor does not exist
+  # Loads and returns a store from firestore with the given ID
+  # Returns nil if the store does not exist
   #
-  # @param [String] id - firestore id for the vendor
-  # @return [Vendor] - a vendor object or nil if not found
-  def load_vendor(id)
+  # @param [String] id - firestore id for the store
+  # @return [Store] - a store object or nil if not found
+  def load_store(id)
 
-    vendor_id = id
+    store_id = id
 
-    # First get the main document - if this exists then the vendor exists
-    vendor_main_doc_ref  = @firestore.doc "#{VENDORS_COL_NAME}/#{vendor_id}"
-    vendor_main_doc = vendor_main_doc_ref.get
-    if vendor_main_doc.exists?
-      vendor_name = vendor_main_doc.data[:name]
+    # First get the main document - if this exists then the store exists
+    store_main_doc_ref  = @firestore.doc "#{STORES_COL_NAME}/#{store_id}"
+    store_main_doc = store_main_doc_ref.get
+    if store_main_doc.exists?
+      store_name = store_main_doc.data[:name]
+      default_currency = store_main_doc.data[:default_currency]
     else
-      log_info "Vendor with id #{vendor_id} does not exist"
+      log_info "Store with id #{store_id} does not exist"
       return nil
     end
 
     # Now get the stripe information
-    vendor_str_doc_ref = vendor_main_doc_ref.col(VENDOR_BACKEND_COL_NAME)
-                                            .doc(VENDOR_BACKEND_STRIPE_DOC_NAME)
-    vendor_str_doc = vendor_str_doc_ref.get
-    if vendor_str_doc.exists?
-      stripe_data = vendor_str_doc.data
-      vendor_str_pub_key = stripe_data[:stripe_publishable_key]
-      vendor_str_user_id = stripe_data[:stripe_user_id]
-      vendor_str_ref_tok = stripe_data[:stripe_refresh_token]
-      vendor_str_acc_tok = stripe_data[:stripe_access_token]
+    store_str_doc_ref = store_main_doc_ref.col(STORE_BACKEND_COL_NAME)
+                                          .doc(STORE_BACKEND_STRIPE_DOC_NAME)
+    store_str_doc = store_str_doc_ref.get
+    if store_str_doc.exists?
+      stripe_data = store_str_doc.data
+      store_str_pub_key = stripe_data[:stripe_publishable_key]
+      store_str_user_id = stripe_data[:stripe_user_id]
+      store_str_ref_tok = stripe_data[:stripe_refresh_token]
+      store_str_acc_tok = stripe_data[:stripe_access_token]
+      txn_fee_base = stripe_data[:txn_fee_base]
+      txn_fee_percent = stripe_data[:txn_fee_percent]
     else
-      log_info "Vendor with id #{vendor_id} does not have Stripe info"
+      log_info "Store with id #{store_id} does not have Stripe info"
       return nil
     end
 
-    # return new vendor object
-    Vendor.new(vendor_id, vendor_name, vendor_str_pub_key,
-               vendor_str_user_id, vendor_str_ref_tok, vendor_str_acc_tok)
+    # return new store object
+    Store.new(store_id, store_name, store_str_pub_key,
+              store_str_user_id, store_str_ref_tok, store_str_acc_tok,
+              txn_fee_base, txn_fee_percent, default_currency)
   end
 end

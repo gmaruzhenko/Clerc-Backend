@@ -34,7 +34,7 @@ http://34.217.14.89:4567
     - Charges a customer with a vendor
     - Input (JSON Body): ```{
                               "customer_id": "cus_Eki4HaYdTlXbfc",
-                              "firebase_vendor_id": "9cMpS9XfzJUSFXskuAEb",
+                              "firebase_store_id": "fHwSHMW0kuBbNl6KQ4hG",
                               "amount": 1000,
                               "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI"
                             }```
