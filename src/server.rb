@@ -106,10 +106,7 @@ class ClercServer  < Sinatra::Base
 # @param = customer_id
 # @return = json stripe ephemeral key object
   post '/customers/create-ephemeral-key' do
-    input = parse_json_params
-    jsoninput = JsonWebToken.decode(input['token'])
-    puts jsoninput
-    return create_ephemeral_key jsoninput
+    return create_ephemeral_key jwt_handler(parse_json_params)
   end
 
 # Creates a charge on a stripe connected account

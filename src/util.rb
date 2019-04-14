@@ -6,6 +6,10 @@ module Util
     message
   end
 
+  def jwt_handler(jwt_input)
+     return JsonWebToken.decode(jwt_input['token'])
+  end
+
   class JsonWebToken
     JWT_SECRET_PATH = Dir.pwd
 
@@ -20,6 +24,7 @@ module Util
       'FAILED'
     end
   end
+
 
 
 end
