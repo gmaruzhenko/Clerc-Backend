@@ -1,6 +1,7 @@
 require_relative 'endpoint_helper'
 require_relative '../util'
 require_relative '../service/firestore_service'
+require 'dotenv'
 
 # Module to hold logic for all vendor related endpoints
 module VendorEndpoints
@@ -9,10 +10,9 @@ module VendorEndpoints
   include Util
 
   # Load environment variables
-  require 'dotenv'
   Dotenv.load
 
-  STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
+  STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
   Stripe.api_key = STRIPE_API_SECRET
   STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 

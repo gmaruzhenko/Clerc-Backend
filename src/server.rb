@@ -45,8 +45,8 @@ include VendorEndpoints
 include Util
 
 # Loading environment variables will likely look very different in EC2
-FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
-STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
+FIREBASE_PROJ_ID = 'paywithclerc'.freeze
+STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
 STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 
 #Place key and cert in the directory of this script
