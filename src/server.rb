@@ -94,6 +94,13 @@ class ClercServer  < Sinatra::Base
     return decoded_jwt.to_json
   end
 
+
+  post '/jwt/refresh' do
+    json_input = parse_json_params
+    puts json_input
+
+  end
+
 # Create a customer in our platform account
 # @param = nil
 # @return = json stripe customer object
@@ -116,7 +123,7 @@ class ClercServer  < Sinatra::Base
 # @param = source
 # @return = stripe charge id
   post '/charge' do
-    return charge(parse_json_params, firestore)
+    return charge(jwt_handler(parse_json_params), firestore)
   end
 
 # This is called by front-end once the connected account is authorized
@@ -126,7 +133,7 @@ class ClercServer  < Sinatra::Base
 # @param = account_auth_code
 # @param = vendor_name
   post('/vendors/connect-standard-account') do
-    return connect_standard_account(parse_json_params, firestore)
+    return connect_standard_account(jwt_handler(parse_json_params), firestore)
   end
 end
 
