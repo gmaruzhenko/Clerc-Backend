@@ -81,7 +81,7 @@ class ClercServer  < Sinatra::Base
 
   post '/jwt/generate' do
     # expire 30 sec from now
-    token = JsonWebToken.encode(parse_json_params, Time.now.to_i + 30)
+    token = JsonWebToken.encode(parse_json_params, Time.now.to_i + 3600)
     return token.to_json
   end
 
@@ -106,7 +106,10 @@ class ClercServer  < Sinatra::Base
 # @param = customer_id
 # @return = json stripe ephemeral key object
   post '/customers/create-ephemeral-key' do
-    return create_ephemeral_key parse_json_params
+    input = parse_json_params
+    jsoninput = JsonWebToken.decode(input['token'])
+    puts jsoninput
+    return create_ephemeral_key jsoninput
   end
 
 # Creates a charge on a stripe connected account
