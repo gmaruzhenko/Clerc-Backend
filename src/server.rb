@@ -12,6 +12,8 @@ require_relative 'model/vendor'
 require_relative 'endpoints/customer_endpoints'
 require_relative 'endpoints/endpoint_helper'
 require_relative 'endpoints/vendor_endpoints'
+require_relative 'service/firestore_service'
+
 
 
 require 'sinatra/base'
@@ -61,6 +63,7 @@ class ClercServer  < Sinatra::Base
   include VendorEndpoints
   include Util
 
+
 # Loading environment variables will likely look very different in EC2
   FIREBASE_PROJ_ID = ENV['FIREBASE_PROJ_ID']
   STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
@@ -72,6 +75,7 @@ class ClercServer  < Sinatra::Base
 
   firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
   puts 'Firestore client initialized'
+  firestore_service = FirestoreService.new firestore
 
 # Test endpoint to check if server is up
   get '/' do
@@ -98,6 +102,12 @@ class ClercServer  < Sinatra::Base
   post '/jwt/refresh' do
     json_input = parse_json_params
     puts json_input
+    userID = json_input['userID']
+    if firestore_service.valid_user? userID
+      puts "YESSSSSSSSSSSSSSSSSSSSss"
+    else
+      puts "NAAAAAAAAAY"
+    end
 
   end
 

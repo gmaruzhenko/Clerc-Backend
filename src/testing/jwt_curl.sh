@@ -17,3 +17,6 @@ curl  -d '{ "token": "eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6ImN1c19Fa2k0SGFZZ
 
 
 eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6ImN1c19Fa2k0SGFZZFRsWGJmYyIsImZpcmViYXNlX3ZlbmRvcl9pZCI6InBheXdpdGhjbGVyY18wIiwiYW1vdW50IjoxMDAwLCJzb3VyY2UiOiJzcmNfMUVISFBUTHJsSERkY2daM1A4SFd6cnJJIiwiZXhwIjoxNTU1MjA5NDYyfQ.ZfT8mdGSnB0kiqTTmqntGOFZl_kCLpGqvd5Y-Dz4GZU
+
+
+curl  --cacert localhost.cert -d '{ "userID":"S9hRYdJmz1TysUdk9SYEE5B04p23"}'  -X POST https:/localhost:4000/jwt/refresh

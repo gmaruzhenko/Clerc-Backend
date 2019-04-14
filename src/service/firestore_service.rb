@@ -12,6 +12,8 @@ class FirestoreService
   VENDOR_BACKEND_COL_NAME = 'backend'.freeze
   VENDOR_BACKEND_STRIPE_DOC_NAME = 'stripe'.freeze
 
+  USER_COL_NAME = 'users'.freeze
+
   @firestore
 
   # Constructor
@@ -90,5 +92,12 @@ class FirestoreService
     # return new vendor object
     Vendor.new(vendor_id, vendor_name, vendor_str_pub_key,
                vendor_str_user_id, vendor_str_ref_tok, vendor_str_acc_tok)
+  end
+
+
+  def valid_user?(userID)
+    userID_doc  = @firestore.doc "#{USER_COL_NAME}/#{userID}"
+    vendor_main_doc = userID_doc.get
+    return vendor_main_doc.exists?
   end
 end
