@@ -7,7 +7,15 @@ module Util
   end
 
   def jwt_handler(jwt_input)
-     return JsonWebToken.decode(jwt_input['token'])
+     json_decoded = JsonWebToken.decode(jwt_input['token'])
+     exp = json_decoded['exp']
+     puts exp
+     if Time.now.to_i > exp
+       puts "expiered"
+     else
+       puts "guuuccci"
+     end
+    return json_decoded
   end
 
   class JsonWebToken

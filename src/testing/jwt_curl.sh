@@ -20,3 +20,9 @@ eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6ImN1c19Fa2k0SGFZZFRsWGJmYyIsImZpcmViYXN
 
 
 curl  --cacert localhost.cert -d '{ "userID":"S9hRYdJmz1TysUdk9SYEE5B04p23"}'  -X POST https:/localhost:4000/jwt/refresh
+
+curl  -d '{ "token": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1MzcwOTM5fQ.P3tg_EUER7Le_kKwKUPQCHQ7-Gal9rOnZ-_8qzebFro"}' -H "Content-Type: application/json" --cacert localhost.cert -X POST https://localhost:4000/customers/create-ephemeral-key
+
+eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1MzY5NzE2fQ.cQSe3YLyhQYVqBOI_xdrBRW1Wrm7Pgc-uaqJ1fhvlfM
+
+
