@@ -1,7 +1,6 @@
 require_relative 'endpoint_helper'
 require_relative '../util'
 require_relative '../service/firestore_service'
-require 'dotenv'
 
 # Module to hold logic for all vendor related endpoints
 module VendorEndpoints
@@ -9,7 +8,7 @@ module VendorEndpoints
   include EndpointHelper
   include Util
 
-  STRIPE_API_SECRET = Stripe.api_key # Should be initialized in server.rb
+  STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
   STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 
   DEFAULT_TXN_FEE_BASE = 0.0
@@ -49,7 +48,7 @@ module VendorEndpoints
                                 form: stripe_data)
 
     # DEBUGGING ONLY
-    # log_info "Stripe response body: #{stripe_response.body}"
+    log_info "Stripe response body: #{stripe_response.body}"
 
     # Check that we have a returned success
     return_error 400, 'API Call to Stripe Failed' if stripe_response.code != 200

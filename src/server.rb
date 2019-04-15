@@ -38,9 +38,10 @@ set :allow_headers, 'content-type,access-control-allow-origin'
 # Load environment variables for development
 # You can download the required .env file from Google Drive. See README
 # TODO: COMMENT OUT FOR DEPLOYMENT
-require 'dotenv'
-Dotenv.load
-STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
+# require 'dotenv'
+# Dotenv.load
+# STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
+
 FIREBASE_PROJ_ID = 'paywithclerc'.freeze
 STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
 
