@@ -10,12 +10,11 @@ module Util
      json_decoded = JsonWebToken.decode(jwt_input['token'])
      exp = json_decoded['exp']
      puts exp
-     if Time.now.to_i > exp
-       puts "expiered"
+     if exp.nil?
+       return_error 401, "token expired , request new token at /refresh"
      else
-       puts "guuuccci"
+       return jwt_input
      end
-    return json_decoded
   end
 
   class JsonWebToken

@@ -114,9 +114,10 @@ class ClercServer  < Sinatra::Base
   end
 
 # Create a customer in our platform account
-# @param = nil
+# @param = token = jwt
 # @return = json stripe customer object
-  get '/customers/create' do
+  post '/customers/create' do
+    jwt_handler parse_json_params
     return create_customer
   end
 
@@ -125,7 +126,7 @@ class ClercServer  < Sinatra::Base
 # @param = customer_id
 # @return = json stripe ephemeral key object
   post '/customers/create-ephemeral-key' do
-    return jwt_handler(parse_json_params).to_json
+    return create_ephemeral_key jwt_handler(parse_json_params)
   end
 
 # Creates a charge on a stripe connected account
