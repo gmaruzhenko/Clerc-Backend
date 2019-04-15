@@ -98,15 +98,17 @@ class ClercServer  < Sinatra::Base
     return decoded_jwt.to_json
   end
 
-
+# Create a JWT for a valid user
+# @param = userID
+# @return = jwt token
   post '/jwt/refresh' do
     json_input = parse_json_params
     puts json_input
     userID = json_input['userID']
     if firestore_service.valid_user? userID
-      puts "YESSSSSSSSSSSSSSSSSSSSss"
+      return JsonWebToken.encode(json_input, Time.now.to_i + 600)
     else
-      puts "NAAAAAAAAAY"
+      error 401
     end
 
   end
