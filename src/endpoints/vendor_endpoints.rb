@@ -9,13 +9,8 @@ module VendorEndpoints
   include EndpointHelper
   include Util
 
-  # Load environment variables
-  Dotenv.load
-
-  STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
-  Stripe.api_key = STRIPE_API_SECRET
+  STRIPE_API_SECRET = Stripe.api_key # Should be initialized in server.rb
   STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
-
 
   DEFAULT_TXN_FEE_BASE = 0.0
   DEFAULT_TXN_FEE_PERCENT = 0.0

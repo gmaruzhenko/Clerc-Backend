@@ -17,37 +17,32 @@ require_relative 'endpoints/endpoint_helper'
 require_relative 'endpoints/vendor_endpoints'
 require_relative 'service/firestore_service'
 
-# Our secret api key for logging customers in our account (comment to switch accounts during debugging)
-# Account name = Test1
-# Stripe.api_key = "sk_test_dUndr7GHsaxgYD9o9jxn6Kmy"
-# Account name = Sample
-# Stripe.api_key = "sk_test_dsoNrcwd0QnNHt8znIVNpCJK"
+# Include the modules that we need
+include EndpointHelper
+include CustomerEndpoints
+include VendorEndpoints
+include Util
 
 # configure to run as server
 # for local testing comment out line below
 # set :bind, '0.0.0.0'
 set port: 9999
 #set logging: true
+
 # CORS
 require 'sinatra/cors'
 set :allow_origin, '*'
 set :allow_methods, 'GET,POST'
 set :allow_headers, 'content-type,access-control-allow-origin'
 
-# Load environment variables for development (comment out in Prod)
+# Load environment variables for development
 # You can download the required .env file from Google Drive. See README
+# TODO: COMMENT OUT FOR DEPLOYMENT
 require 'dotenv'
 Dotenv.load
-
-include EndpointHelper
-include CustomerEndpoints
-include VendorEndpoints
-include Util
-
-# Loading environment variables will likely look very different in EC2
+STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
 FIREBASE_PROJ_ID = 'paywithclerc'.freeze
 STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
-STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 
 #Place key and cert in the directory of this script
 CERT_PATH = Dir.pwd
@@ -78,30 +73,17 @@ post '/customers/create' do
   return create_customer
 end
 
-# generates temp key for ios
-# @param = stripe_version
-# @param = customer_id
-# @return = json stripe ephemeral key object
+# Creates ephemeral key for mobile client to grant permissions
 post '/customers/create-ephemeral-key' do
   return create_ephemeral_key jwt_handler(parse_json_params)
 end
 
 # Creates a charge on a stripe connected account
-# @param = customer_id
-# @param = CONNECTED_STRIPE_ACCOUNT_ID
-# @param = amount
-# @param = source
-# @return = stripe charge id
 post '/charge' do
   return charge(jwt_handler(parse_json_params), firestore)
 end
 
-# This is called by front-end once the connected account is authorized
-# Once the business gives us authorization, frontend will receive a code
-# which is then passed to this method through a backend call.
-# We will use the AUTHORIZATION_CODE to retrieve credentials for the business
-# @param = account_auth_code
-# @param = vendor_name
+# Connects a store to a vendor
 post('/vendors/connect-standard-account') do
   return connect_standard_account(jwt_handler(parse_json_params), firestore)
 end
