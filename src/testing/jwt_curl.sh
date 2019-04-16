@@ -35,5 +35,10 @@ eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXh
 
 curl  -d '{ "token":"eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1MzczMjUzfQ.Fwa51eAdNoANnkPVw3szy9yDhyb7Wh3iwjUYjKnGY3Q","customer_id": "cus_Eki4HaYdTlXbfc", "firebase_vendor_id": "paywithclerc_0", "amount": 1000, "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI" }' -H "Content-Type: application/json" --cacert localhost.cert -X POST https://localhost:4000/charge
 
+eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1NDMxMjU0fQ.ESMCuAXjpNwEgVkaBRQNy6b9imewnps3zhZc-f8JKVI
+
+curl  -d '{ "token":"eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1NDMxMjU0fQ.ESMCuAXjpNwEgVkaBRQNy6b9imewnps3zhZc-f8JKVI","customer_id": "cus_Eki4HaYdTlXbfc", "firebase_vendor_id": "paywithclerc_0", "amount": 1000, "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI" }' -H "Content-Type: application/json"  -X POST http://localhost:9999/charge
+
+
 
 

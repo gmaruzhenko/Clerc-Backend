@@ -24,24 +24,13 @@ module Util
 
     def self.encode(payload, expiration)
       payload[:exp] = expiration
-      JWT.encode(payload, File.open(File.join(CERT_PATH, "clerc_jwt_fast.key")).read)
+      JWT.encode(payload, File.open(File.join(JWT_SECRET_PATH, "clerc_jwt_fast.key")).read)
     end
 
     def self.decode(token)
-      return JWT.decode(token, File.open(File.join(CERT_PATH, "clerc_jwt_fast.key")).read)[0]
+      return JWT.decode(token, File.open(File.join(JWT_SECRET_PATH, "clerc_jwt_fast.key")).read)[0]
     rescue
       'FAILED'
-    end
-  end
-
-  # Returns 10 min JWT token for valid users
-  def refresh_token (json_input , firestore)
-    firestore_service = FirestoreService.new firestore
-    userID = json_input['userID']
-    if firestore_service.valid_user? userID
-      return JsonWebToken.encode(json_input, Time.now.to_i + 600)
-    else
-      return_error 401, "Access denied - invalid user ID"
     end
   end
 end
