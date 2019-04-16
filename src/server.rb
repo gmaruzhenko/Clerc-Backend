@@ -7,10 +7,15 @@ require 'stripe'
 require 'json'
 require 'http'
 require 'google/cloud/firestore'
+
+require 'jwt'
+require_relative 'model/vendor'
+
 require_relative 'model/store'
 require_relative 'endpoints/customer_endpoints'
 require_relative 'endpoints/endpoint_helper'
 require_relative 'endpoints/vendor_endpoints'
+require_relative 'service/firestore_service'
 
 # Our secret api key for logging customers in our account (comment to switch accounts during debugging)
 # Account name = Test1
@@ -21,7 +26,8 @@ require_relative 'endpoints/vendor_endpoints'
 # configure to run as server
 # for local testing comment out line below
 # set :bind, '0.0.0.0'
-#
+set port: 9999
+#set logging: true
 # CORS
 require 'sinatra/cors'
 set :allow_origin, '*'
@@ -54,10 +60,18 @@ get '/' do
   return log_info("Connection Successful\n")
 end
 
+# Create a JWT for a valid user that lasts 10 min
+# @param = userID
+# @return = jwt token
+post '/jwt/refresh' do
+  return refresh_token(parse_json_params , firestore)
+end
+
 # Create a customer in our platform account
-# @param = nil
+# @param = token = jwt
 # @return = json stripe customer object
-get '/customers/create' do
+post '/customers/create' do
+  jwt_handler parse_json_params
   return create_customer
 end
 
@@ -66,7 +80,7 @@ end
 # @param = customer_id
 # @return = json stripe ephemeral key object
 post '/customers/create-ephemeral-key' do
-  return create_ephemeral_key parse_json_params
+  return create_ephemeral_key jwt_handler(parse_json_params)
 end
 
 # Creates a charge on a stripe connected account
@@ -76,7 +90,7 @@ end
 # @param = source
 # @return = stripe charge id
 post '/charge' do
-  return charge(parse_json_params, firestore)
+  return charge(jwt_handler(parse_json_params), firestore)
 end
 
 # This is called by front-end once the connected account is authorized
@@ -86,5 +100,5 @@ end
 # @param = account_auth_code
 # @param = vendor_name
 post('/vendors/connect-standard-account') do
-  return connect_standard_account(parse_json_params, firestore)
+  return connect_standard_account(jwt_handler(parse_json_params), firestore)
 end
