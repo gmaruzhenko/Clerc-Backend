@@ -6,6 +6,9 @@ curl -d '{"token":"eyJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIiwiZXhwIjoxNTU0Njc3
 # forever token
 # eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6ImN1c19FaWM3RDEyRUJ5QkFOTCIsInN0cmlwZV92ZXJzaW9uIjoiMjAxOS0wMy0xNCIsImV4cCI6MTU1NTIwMjI5Mn0.6diYOXd5mLfoWZyOwpEXH8wCNCsmXAWhi5rBHiSkan0
 
+
+
+#these below are garbage copy pasta for testing, cand delete in later clean up
 curl -d '{"token":"eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6ImN1c19FaWM3RDEyRUJ5QkFOTCIsInN0cmlwZV92ZXJzaW9uIjoiMjAxOS0wMy0xNCIsImV4cCI6MTU1NjIwMzgyMX0.hpaA7QTJlNtfF0dc9KcXtIJt1XTntiv89PDImhFZ51M"}' -H "Content-Type: application/json"  --cacert localhost.cert  -X POST https:/localhost:4000/customers/create-ephemeral-key
 
 

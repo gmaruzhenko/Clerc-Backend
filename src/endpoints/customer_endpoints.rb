@@ -103,7 +103,7 @@ module CustomerEndpoints
     # Return the charge ID
     { charge_id: charge.id }.to_json
   end
-  
+
   # Returns 10 min JWT token for valid users
   def refresh_token (json_input , firestore)
     firestore_service = FirestoreService.new firestore
