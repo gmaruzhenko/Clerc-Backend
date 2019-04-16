@@ -6,6 +6,7 @@ module Util
     message
   end
 
+# Returns input parameters if token is valid
   def jwt_handler(jwt_input)
      json_decoded = JsonWebToken.decode(jwt_input['token'])
      exp = json_decoded['exp']
@@ -17,6 +18,7 @@ module Util
      end
   end
 
+# encrypt / decrypt tokens
   class JsonWebToken
     JWT_SECRET_PATH = Dir.pwd
 
@@ -32,8 +34,14 @@ module Util
     end
   end
 
-
-
-
-
+  # Returns 10 min JWT token for valid users
+  def refresh_token (json_input , firestore)
+    firestore_service = FirestoreService.new firestore
+    userID = json_input['userID']
+    if firestore_service.valid_user? userID
+      return JsonWebToken.encode(json_input, Time.now.to_i + 600)
+    else
+      return_error 401, "Access denied - invalid user ID"
+    end
+  end
 end

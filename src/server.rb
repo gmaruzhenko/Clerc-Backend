@@ -75,7 +75,6 @@ class ClercServer  < Sinatra::Base
 
   firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
   puts 'Firestore client initialized'
-  firestore_service = FirestoreService.new firestore
 
 # Test endpoint to check if server is up
   get '/' do
@@ -83,34 +82,11 @@ class ClercServer  < Sinatra::Base
     return log_info("Connection Successful\n")
   end
 
-  post '/jwt/generate' do
-    # expire 30 sec from now
-    token = JsonWebToken.encode(parse_json_params, Time.now.to_i + 3600)
-    return token.to_json
-  end
-
-  post '/jwt/validate' do
-    json_input = parse_json_params
-    puts json_input
-    token = json_input['token']
-    decoded_jwt = JsonWebToken.decode(token)
-    puts decoded_jwt.to_s
-    return decoded_jwt.to_json
-  end
-
-# Create a JWT for a valid user
+# Create a JWT for a valid user that lasts 10 min
 # @param = userID
 # @return = jwt token
   post '/jwt/refresh' do
-    json_input = parse_json_params
-    puts json_input
-    userID = json_input['userID']
-    if firestore_service.valid_user? userID
-      return JsonWebToken.encode(json_input, Time.now.to_i + 600)
-    else
-      error 401
-    end
-
+    return refresh_token(parse_json_params , firestore)
   end
 
 # Create a customer in our platform account

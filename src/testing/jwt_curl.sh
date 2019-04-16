@@ -23,12 +23,17 @@ curl  --cacert localhost.cert -d '{ "userID":"S9hRYdJmz1TysUdk9SYEE5B04p23"}'  -
 
 curl  -d '{ "token": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1MzcwOTM5fQ.P3tg_EUER7Le_kKwKUPQCHQ7-Gal9rOnZ-_8qzebFro"}' -H "Content-Type: application/json" --cacert localhost.cert -X POST https://localhost:4000/customers/create-ephemeral-key
 
-curl  -d '{ "token": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1MzcyMzQ2fQ.03q3lB8oGA5Iu2n2QHMfwQMroIR0RxQapajL9pkusOY","customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14"}' -H "Content-Type: application/json" --cacert localhost.cert -X POST https://localhost:4000/customers/create-ephemeral-key
+curl  -d '{ "token": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1MzczMjUzfQ.Fwa51eAdNoANnkPVw3szy9yDhyb7Wh3iwjUYjKnGY3Q","customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14"}' -H "Content-Type: application/json" --cacert localhost.cert -X POST https://localhost:4000/customers/create-ephemeral-key
 
 curl  -d '{ "token": ""}' -H "Content-Type: application/json" --cacert localhost.cert -X POST https://localhost:4000/customers/create-ephemeral-key
 
 eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1MzY5NzE2fQ.cQSe3YLyhQYVqBOI_xdrBRW1Wrm7Pgc-uaqJ1fhvlfM
 
 eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1MzcyMzQ2fQ.03q3lB8oGA5Iu2n2QHMfwQMroIR0RxQapajL9pkusOY
+
+eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1MzczMjUzfQ.Fwa51eAdNoANnkPVw3szy9yDhyb7Wh3iwjUYjKnGY3Q
+
+curl  -d '{ "token":"eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySUQiOiJTOWhSWWRKbXoxVHlzVWRrOVNZRUU1QjA0cDIzIiwiZXhwIjoxNTU1MzczMjUzfQ.Fwa51eAdNoANnkPVw3szy9yDhyb7Wh3iwjUYjKnGY3Q","customer_id": "cus_Eki4HaYdTlXbfc", "firebase_vendor_id": "paywithclerc_0", "amount": 1000, "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI" }' -H "Content-Type: application/json" --cacert localhost.cert -X POST https://localhost:4000/charge
+
 
 
