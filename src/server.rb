@@ -7,8 +7,11 @@ require 'stripe'
 require 'json'
 require 'http'
 require 'google/cloud/firestore'
+
 require 'jwt'
 require_relative 'model/vendor'
+
+require_relative 'model/store'
 require_relative 'endpoints/customer_endpoints'
 require_relative 'endpoints/endpoint_helper'
 require_relative 'endpoints/vendor_endpoints'

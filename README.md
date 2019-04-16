@@ -34,7 +34,7 @@ http://34.217.14.89:4567
     - Charges a customer with a vendor
     - Input (JSON Body): ```{
                               "customer_id": "cus_Eki4HaYdTlXbfc",
-                              "firebase_vendor_id": "9cMpS9XfzJUSFXskuAEb",
+                              "firebase_store_id": "fHwSHMW0kuBbNl6KQ4hG",
                               "amount": 1000,
                               "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI"
                             }```
@@ -100,3 +100,10 @@ IMPORTANT: Set environment variable for Google Firestore as defined here: https:
 ```ps aux | grep ruby```
 2. Tail to get logs of process with pid (ex <pid> = 8381):
 ````tail -f /proc/<pid>/fd/1````
+
+### Certs 
+#### Https generating:
+
+    openssl genrsa 2048 > host.key
+    chmod 400 host.key
+    openssl req -new -x509 -nodes -sha256 -days 365 -key host.key -out host.cert
