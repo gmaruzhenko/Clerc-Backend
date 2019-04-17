@@ -1,4 +1,12 @@
+require 'jwt'
+
+# Helper methods for all our endpoints
 module EndpointHelper
+  # TODO: COMMENT OUT FOR DEPLOYMENT
+  require 'dotenv'
+  Dotenv.load
+
+  JWT_KEY = ENV['JWT_KEY']
 
   # Parse JSON parameters from incoming response
   # Or return 400 if the request JSON is invalid
@@ -16,31 +24,40 @@ module EndpointHelper
   end
 
   # Returns input parameters if token is valid
-  def jwt_handler(jwt_input)
-    json_decoded = JsonWebToken.decode(jwt_input['token'])
-    exp = json_decoded['exp']
-    puts exp
-    if exp.nil?
-      return_error 401, "token expired , request new token at /refresh"
-    else
-      return jwt_input
+  # Else will return a 401 error code
+  def check_jwt(jwt_input)
+
+    # Decode the token - this will automatically check for expiry
+    begin
+      jwt_token = decode_jwt jwt_input['token']
+      puts jwt_token
+      # Also check that an expiry was actually given
+      exp = jwt_token[0]['exp'] # The first in the array is the token
+      if exp.nil?
+        return error 401, 'Invalid JWT - no expiry'
+      end
+    rescue JWT::ExpiredSignature
+      # Token has expired
+      return error 401, 'JWT has expired. Please request a new one'
     end
+
+    # If all checks pass - return the original input
+    jwt_input
   end
 
-  # encrypt / decrypt tokens
-  class JsonWebToken
-    JWT_SECRET_PATH = Dir.pwd
+  # Creates a new JWT token
+  def create_jwt(sub, exp)
+    payload = {
+      sub: sub,
+      exp: exp
+    }
+    JWT.encode payload, JWT_KEY, 'HS256'
+  end
 
-    def self.encode(payload, expiration)
-      payload[:exp] = expiration
-      JWT.encode(payload, File.open(File.join(JWT_SECRET_PATH, "clerc_jwt_fast.key")).read)
-    end
-
-    def self.decode(token)
-      return JWT.decode(token, File.open(File.join(JWT_SECRET_PATH, "clerc_jwt_fast.key")).read)[0]
-    rescue
-      'FAILED'
-    end
+  # Decodes a given JWT key
+  # THROWS JWT::ExpiredSignature if the JWT has expired
+  def decode_jwt(jwt)
+    JWT.decode jwt, JWT_KEY, true, algorithm: 'HS256'
   end
 
 end

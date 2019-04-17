@@ -8,9 +8,6 @@ require 'json'
 require 'http'
 require 'google/cloud/firestore'
 
-require 'jwt'
-require_relative 'model/vendor'
-
 require_relative 'model/store'
 require_relative 'endpoints/customer_endpoints'
 require_relative 'endpoints/endpoint_helper'
@@ -40,7 +37,6 @@ set :allow_headers, 'content-type,access-control-allow-origin'
 
 FIREBASE_PROJ_ID = 'paywithclerc'.freeze
 STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
-CERT_PATH = Dir.pwd #Place key and cert in the directory of this script
 
 Stripe.api_key = STRIPE_API_SECRET
 
@@ -54,32 +50,28 @@ get '/' do
 end
 
 # Create a JWT for a valid user that lasts 10 min
-# @param = userID
-# @return = jwt token
 post '/jwt/refresh' do
-  return refresh_token(parse_json_params, firestore)
+  return create_refresh_token(parse_json_params, firestore)
 end
 
 # Create a customer in our platform account
-# @param = token = jwt
-# @return = json stripe customer object
 post '/customers/create' do
-  jwt_handler parse_json_params
+  check_jwt parse_json_params
   return create_customer
 end
 
 # Creates ephemeral key for mobile client to grant permissions
 post '/customers/create-ephemeral-key' do
-  return create_ephemeral_key jwt_handler(parse_json_params)
+  return create_ephemeral_key check_jwt(parse_json_params)
 end
 
 # Creates a charge on a stripe connected account
 post '/charge' do
-  return charge(jwt_handler(parse_json_params), firestore)
+  return charge(check_jwt(parse_json_params), firestore)
 end
 
 # Connects a store to a vendor
 post('/vendors/connect-standard-account') do
-  return connect_standard_account(jwt_handler(parse_json_params), firestore)
+  return connect_standard_account(check_jwt(parse_json_params), firestore)
 end
 
