@@ -23,12 +23,6 @@ include CustomerEndpoints
 include VendorEndpoints
 include Util
 
-# configure to run as server
-# for local testing comment out line below
-# set :bind, '0.0.0.0'
-set port: 9999
-#set logging: true
-
 # CORS
 require 'sinatra/cors'
 set :allow_origin, '*'
@@ -44,9 +38,7 @@ set :allow_headers, 'content-type,access-control-allow-origin'
 
 FIREBASE_PROJ_ID = 'paywithclerc'.freeze
 STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
-
-#Place key and cert in the directory of this script
-CERT_PATH = Dir.pwd
+CERT_PATH = Dir.pwd #Place key and cert in the directory of this script
 
 Stripe.api_key = STRIPE_API_SECRET
 
