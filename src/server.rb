@@ -15,12 +15,14 @@ require_relative 'model/store'
 require_relative 'endpoints/customer_endpoints'
 require_relative 'endpoints/endpoint_helper'
 require_relative 'endpoints/vendor_endpoints'
+require_relative 'endpoints/security_endpoints'
 require_relative 'service/firestore_service'
 
 # Include the modules that we need
 include EndpointHelper
 include CustomerEndpoints
 include VendorEndpoints
+include SecurityEndpoints
 include Util
 
 # CORS
@@ -55,7 +57,7 @@ end
 # @param = userID
 # @return = jwt token
 post '/jwt/refresh' do
-  return refresh_token(parse_json_params , firestore)
+  return refresh_token(parse_json_params, firestore)
 end
 
 # Create a customer in our platform account
