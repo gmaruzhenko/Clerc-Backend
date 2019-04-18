@@ -1,7 +1,11 @@
 require 'jwt'
+require_relative '../util'
 
 # Helper methods for all our endpoints
 module EndpointHelper
+
+  include Util
+
   # TODO: COMMENT OUT FOR DEPLOYMENT
   require 'dotenv'
   Dotenv.load
@@ -25,24 +29,37 @@ module EndpointHelper
 
   # Returns input parameters if token is valid
   # Else will return a 401 error code
-  def check_jwt(jwt_input)
+  def check_jwt(input_json)
+
+    # Check that a token exists in the first place
+    token_from_json = input_json['token']
+    if token_from_json.nil?
+      log_info 'No JWT token was passed in the request'
+      return_error 401, 'Please pass a token in the request'
+    end
 
     # Decode the token - this will automatically check for expiry
     begin
-      jwt_token = decode_jwt jwt_input['token']
-      puts jwt_token
+      # decode_jwt will fail if the JWT has expired
+      jwt_token = decode_jwt input_json['token']
       # Also check that an expiry was actually given
       exp = jwt_token[0]['exp'] # The first in the array is the token
       if exp.nil?
+        log_info 'JWT in request does not have expiry property'
         return error 401, 'Invalid JWT - no expiry'
       end
     rescue JWT::ExpiredSignature
       # Token has expired
+      log_info 'JWT was decoded but has expired'
       return error 401, 'JWT has expired. Please request a new one'
+    rescue StandardError => error
+      # Occurs when the JWT simply isn't valid
+      log_info "Error while decoding JWT: #{error}"
+      return error 401, 'Please pass a valid JWT token'
     end
 
     # If all checks pass - return the original input
-    jwt_input
+    input_json
   end
 
   # Creates a new JWT token
