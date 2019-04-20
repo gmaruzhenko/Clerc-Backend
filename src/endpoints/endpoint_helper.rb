@@ -7,10 +7,11 @@ module EndpointHelper
   include Util
 
   # TODO: COMMENT OUT FOR DEPLOYMENT
-  require 'dotenv'
-  Dotenv.load
+  # require 'dotenv'
+  # Dotenv.load
+  # JWT_KEY = ENV['JWT_KEY']
 
-  JWT_KEY = ENV['JWT_KEY']
+  JWT_KEY = '!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w9z$C&F)J@NcQfTjWnZr4'.freeze
 
   # Parse JSON parameters from incoming response
   # Or return 400 if the request JSON is invalid
@@ -46,16 +47,16 @@ module EndpointHelper
       exp = jwt_token[0]['exp'] # The first in the array is the token
       if exp.nil?
         log_info 'JWT in request does not have expiry property'
-        return error 401, 'Invalid JWT - no expiry'
+        return_error 401, 'Invalid JWT - no expiry'
       end
     rescue JWT::ExpiredSignature
       # Token has expired
       log_info 'JWT was decoded but has expired'
-      return error 401, 'JWT has expired. Please request a new one'
+      return_error 401, 'JWT has expired. Please request a new one'
     rescue StandardError => error
       # Occurs when the JWT simply isn't valid
       log_info "Error while decoding JWT: #{error}"
-      return error 401, 'Please pass a valid JWT token'
+      return_error 401, 'Please pass a valid JWT token'
     end
 
     # If all checks pass - return the original input

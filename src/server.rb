@@ -56,7 +56,6 @@ end
 
 # Create a customer in our platform account
 post '/customers/create' do
-  check_jwt parse_json_params
   return create_customer
 end
 

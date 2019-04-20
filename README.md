@@ -24,14 +24,9 @@ SECURED endpoints require a valid JWT token (See Security Endpoints)
 
 ##### Customer Endpoints
 
-1. ```POST /customers/create``` (Secured)
+1. ```POST /customers/create``` (Unsecured)
     - Creates empty, new customer
-    - Input: 
-    ```
-    {
-      "token": "[YOUR_JWT_TOKEN]"
-    }
-    ```
+    - Input: None
     - Expected Output: 
     ```
     {"customer_id": "cus_EngWBBKckHWUT2"}
