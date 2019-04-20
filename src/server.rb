@@ -28,20 +28,22 @@ set :allow_origin, '*'
 set :allow_methods, 'GET,POST'
 set :allow_headers, 'content-type,access-control-allow-origin'
 
-# Load environment variables for development
-# You can download the required .env file from Google Drive. See README
-# TODO: COMMENT OUT FOR DEPLOYMENT
-# require 'dotenv'
-# Dotenv.load
-# STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
-
-FIREBASE_PROJ_ID = 'paywithclerc'.freeze
-STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
-
-Stripe.api_key = STRIPE_API_SECRET
-
-firestore = Google::Cloud::Firestore.new project_id: FIREBASE_PROJ_ID
+# Initialize the base firestore service
+firestore = Google::Cloud::Firestore.new project_id: 'paywithclerc'
 puts 'Firestore client initialized'
+
+# Initialize our own abstraction service for firestore
+firestore_service = FirestoreService.new firestore
+
+# Get secrets
+jwt_secret = firestore_service.get_secret FirestoreService::JWT_KEY_DOC
+stripe_secret = firestore_service.get_secret FirestoreService::STRIPE_KEY_DOC
+
+puts jwt_secret
+puts stripe_secret
+
+# Initialize Stripe
+Stripe.api_key = stripe_secret
 
 # Test endpoint to check if server is up
 get '/' do
@@ -51,7 +53,7 @@ end
 
 # Create a JWT for a valid user that lasts 10 min
 post '/jwt/refresh' do
-  return create_refresh_token(parse_json_params, firestore)
+  return create_refresh_token(parse_json_params, firestore_service, jwt_secret)
 end
 
 # Create a customer in our platform account
@@ -61,16 +63,18 @@ end
 
 # Creates ephemeral key for mobile client to grant permissions
 post '/customers/create-ephemeral-key' do
-  return create_ephemeral_key check_jwt(parse_json_params)
+  return create_ephemeral_key check_jwt(parse_json_params, jwt_secret)
 end
 
 # Creates a charge on a stripe connected account
 post '/charge' do
-  return charge(check_jwt(parse_json_params), firestore)
+  return charge(check_jwt(parse_json_params, jwt_secret),
+                firestore_service)
 end
 
 # Connects a store to a vendor
 post('/vendors/connect-standard-account') do
-  return connect_standard_account(check_jwt(parse_json_params), firestore)
+  return connect_standard_account(check_jwt(parse_json_params, jwt_secret),
+                                  firestore_service)
 end
 

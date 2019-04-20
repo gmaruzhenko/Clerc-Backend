@@ -18,9 +18,7 @@ module VendorEndpoints
   #
   # Connects a standard stripe retailer account with our system
   #
-  def connect_standard_account(json_input, firestore)
-    # Get the firebase service
-    firestore_service = FirestoreService.new firestore
+  def connect_standard_account(json_input, firestore_service)
 
     # Check that it's not empty, otherwise continue
     halt 400, 'Invalid request - no JSON given' if json_input.empty?

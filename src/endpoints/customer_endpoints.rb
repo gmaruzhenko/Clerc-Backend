@@ -50,7 +50,7 @@ module CustomerEndpoints
   # Charges a customer with a given store
   # Returns the transaction ID if successful
   #
-  def charge(json_input, firestore)
+  def charge(json_input, firestore_service)
     # Check that input is not empty, otherwise continue
     halt 400, 'Invalid request - no JSON given' if json_input.empty?
 
@@ -67,9 +67,6 @@ module CustomerEndpoints
     if cust_id.nil? || firebase_store_id.nil? || amount.nil? || payment_src.nil?
       return_error 400, 'Invalid request - required params not passed'
     end
-
-    # Get firestore service
-    firestore_service = FirestoreService.new(firestore)
 
     # Try getting the Store object from firebase
     store_from_firebase = firestore_service.load_store firebase_store_id

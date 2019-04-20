@@ -6,13 +6,18 @@ require_relative '../util'
 class FirestoreService
   include Util
 
-  # Names of our firebase data structure
+  # Names of our firebase data structure (client facing)
   STORES_COL_NAME = 'stores'.freeze
   VENDORS_COL_NAME = 'vendors'.freeze
   CUSTOMERS_COL_NAME = 'customers'.freeze
   VENDOR_STORES_PROP = 'stores'.freeze
   STORE_BACKEND_COL_NAME = 'backend'.freeze
   STORE_BACKEND_STRIPE_DOC_NAME = 'stripe'.freeze
+
+  # Names of our firebase data structure for secrets
+  SECRETS_COL_NAME = 'secrets'.freeze
+  JWT_KEY_DOC = 'JWT_KEY'.freeze
+  STRIPE_KEY_DOC = 'STRIPE_API_SECRET'.freeze
 
   @firestore
 
@@ -81,7 +86,8 @@ class FirestoreService
     store_id = id
 
     # First get the main document - if this exists then the store exists
-    store_main_doc_ref = @firestore.doc "#{STORES_COL_NAME}/#{store_id}"
+    store_main_doc_ref = @firestore.col(STORES_COL_NAME)
+                                   .doc(store_id)
     store_main_doc = store_main_doc_ref.get
     if store_main_doc.exists?
       store_name = store_main_doc.data[:name]
@@ -132,4 +138,22 @@ class FirestoreService
 
     false
   end
+
+  # Retrieves the given secret from firebase
+  #
+  # @param secret_name The constant (defined in this class) for the secret
+  def get_secret(secret_name)
+
+    secret_doc = @firestore.col(SECRETS_COL_NAME)
+                           .doc(secret_name)
+                           .get
+
+    # Return the secret if we can find it
+    return secret_doc.data[:key] if secret_doc.exists?
+
+    # Else return nil
+    log_info "Could not find secret #{secret_name} - document does not exist"
+    nil
+  end
+
 end
