@@ -39,9 +39,6 @@ firestore_service = FirestoreService.new firestore
 jwt_secret = firestore_service.get_secret FirestoreService::JWT_KEY_DOC
 stripe_secret = firestore_service.get_secret FirestoreService::STRIPE_KEY_DOC
 
-puts jwt_secret
-puts stripe_secret
-
 # Initialize Stripe
 Stripe.api_key = stripe_secret
 
@@ -75,6 +72,7 @@ end
 # Connects a store to a vendor
 post('/vendors/connect-standard-account') do
   return connect_standard_account(check_jwt(parse_json_params, jwt_secret),
-                                  firestore_service)
+                                  firestore_service,
+                                  stripe_secret)
 end
 

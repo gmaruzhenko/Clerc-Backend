@@ -73,6 +73,12 @@ module CustomerEndpoints
     return_error 400, "Store #{firebase_store_id}  not found" if store_from_firebase.nil?
 
     store_stripe_id = store_from_firebase.stripe_user_id
+
+    # Calculate the fee to charge
+    application_fee = amount * store_from_firebase.txn_fee_percent / 100
+    application_fee += store_from_firebase.txn_fee_base
+    puts application_fee # TODO: REMOVE ME AFTER TESTING
+
     begin
       # This creates a shared customer token, required for connected accounts
       token = Stripe::Source.create({
@@ -86,7 +92,7 @@ module CustomerEndpoints
                                        amount: amount,
                                        currency: 'cad',
                                        source: token.id,
-                                       application_fee_amount: 5,
+                                       application_fee_amount: application_fee,
                                        description: charge_description,
                                        statement_descriptor: statement_descriptor
                                      }, stripe_account: store_stripe_id)
@@ -100,5 +106,4 @@ module CustomerEndpoints
     # Return the charge ID
     { charge_id: charge.id }.to_json
   end
-
 end

@@ -8,17 +8,16 @@ module VendorEndpoints
   include EndpointHelper
   include Util
 
-  STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
   STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 
-  DEFAULT_TXN_FEE_BASE = 0.0
-  DEFAULT_TXN_FEE_PERCENT = 0.0
+  DEFAULT_TXN_FEE_BASE = 5.0 # In cents
+  DEFAULT_TXN_FEE_PERCENT = 0.0 # In percent
   DEFAULT_CURRENCY = 'cad'.freeze
 
   #
   # Connects a standard stripe retailer account with our system
   #
-  def connect_standard_account(json_input, firestore_service)
+  def connect_standard_account(json_input, firestore_service, stripe_secret)
 
     # Check that it's not empty, otherwise continue
     halt 400, 'Invalid request - no JSON given' if json_input.empty?
@@ -33,7 +32,7 @@ module VendorEndpoints
 
     # Retrieve required fields from Stripe
     stripe_data = {
-      client_secret: STRIPE_API_SECRET,
+      client_secret: stripe_secret,
       code: new_account_auth,
       grant_type: 'authorization_code'
     }
