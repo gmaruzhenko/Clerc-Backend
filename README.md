@@ -5,105 +5,123 @@
 ```gem install bundler```
 2. Install required dependencies with Bundler (in root directory)
 ```bundle install```
+3. Download `.env (backend)` from Google Drive. Place it into the `src` folder and rename it to `.env`
+4. Download `Clerc-xxxxx.json` from Google Drive. This is required to authorize Firebase to access the clerc project.
+5. Place `Clerc-xxxxx.json` in any directory, then add it to your `PATH` with the following command: 
+`export GOOGLE_APPLICATION_CREDENTIALS="[PATH_TO_JSON]/[FILE_NAME].json"`
+6. Make sure dev-specific code is uncommented (ex. dotenv stuff)
+7. Run locally: `cd src` then `ruby server.rb`
 
 ### Endpoints
 
-##### Base URL
-http://34.217.14.89:4567
+SECURED endpoints require a valid JWT token (See Security Endpoints)
 
-1. ```GET /```
+##### General
+
+1. ```GET /``` (Unsecured)
     - Test Endpoint
     - Expected Output: ```Connection Successful```
 
 ##### Customer Endpoints
 
-1. ```GET /customers/create```
+1. ```POST /customers/create``` (Unsecured)
     - Creates empty, new customer
     - Input: None
-    - Expected Output: ```{"customer_id": "cus_EngWBBKckHWUT2"}```
+    - Expected Output: 
+    ```
+    {"customer_id": "cus_EngWBBKckHWUT2"}
+    ```
 
-2. ```POST /customers/create-ephemeral-key```
+2. ```POST /customers/create-ephemeral-key``` (Secured)
     - Creates short-lived auth key for customer
-    - Input (JSON Body): ```{
-                  "customer_id": "cus_Eki4HaYdTlXbfc",
-                  "stripe_version": "2019-03-14"
-                }```
+    - Input (JSON Body): 
+    ```
+    {
+      "customer_id": "cus_Eki4HaYdTlXbfc",
+      "stripe_version": "2019-03-14",
+      "token": "[YOUR_JWT_TOKEN]"
+    }
+    ```
     - Expected Output: Ephemeral key object from stripe
+    ```
+    {
+        "id": "ephkey_1EQNhELrlHDdcgZ3oGK6X4fm",
+        "object": "ephemeral_key",
+        "associated_objects": [
+            {
+                "id": "cus_Eic7D12EByBANL",
+                "type": "customer"
+            }
+        ],
+        "created": 1555545704,
+        "expires": 1555549304,
+        "livemode": false,
+        "secret": "ek_test_YWNjdF8xRUVpaE9McmxIRGRjZ1ozLE1UU2pNSlpwRXJHdmZoa0IybWVoTDVkUHZjQ1E3aWE_00RyjITY4p"
+    }
+    ```
 
-3. ```POST /charge```
+3. ```POST /charge``` (Secured)
     - Charges a customer with a vendor
-    - Input (JSON Body): ```{
-                              "customer_id": "cus_Eki4HaYdTlXbfc",
-                              "firebase_store_id": "fHwSHMW0kuBbNl6KQ4hG",
-                              "amount": 1000,
-                              "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI"
-                            }```
-    - Expected Output: ```{"charge_id":"ch_1EK5GMF8Tv70HUiaZtuylq6c"}```
+    - Input (JSON Body): 
+    ```
+    {
+      "customer_id": "cus_Eki4HaYdTlXbfc",
+      "firebase_store_id": "fHwSHMW0kuBbNl6KQ4hG",
+      "amount": 1000,
+      "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI",
+      "token": "[YOUR_JWT_TOKEN]"
+    }
+    ```
+    - Expected Output: 
+    ```
+    {"charge_id":"ch_1EK5GMF8Tv70HUiaZtuylq6c"}
+    ```
     
 ##### Vendor Endpoints
 
-4. ```POST /vendors/connect-standard-account```
+1. ```POST /vendors/connect-standard-account```
     - Initializes a new vendor & saves to firebase
     - Don't test this programmatically for now
+    - Input (JSON Body): 
+    ```
+    {
+      "account_auth_code": "[CODE_FROM_STRIPE]",
+      "vendor_id": "[VALID VENDOR ID]",
+      "store_name": "[ANY NAME]"
+    }
+    ```
+    - Expected Output: 
+    ```
+    {"firebase_id":"[FIREBASE_ID_OF_STORE]"}
+    ```
     
-### Operation
-0. FOR LOCAL DEVELOPMENT: Place .env file (located in Clerc's Google Drive/Code/Keys/.env) in src
-0. Add mvp-1.pem from lastpass to a file in your home directory.
-0. Set Google Environment variable (Get JSON from Google Drive - place this in main directory - this won't be committed)
-```export GOOGLE_APPLICATION_CREDENTIALS="../[FILE_NAME].json"```
-1. Connect to EC2
-```ssh -i "mvp-1.pem" ubuntu@ec2-34-217-14-89.us-west-2.compute.amazonaws.com```
-2. Run server
-```ruby server.rb```
-3. You can now run the following:   
-- Test connection:
+#### Security Endpoints
 
-```curl -X GET http://34.217.14.89:4567/```
+1. ```POST /jwt/refresh```
+    - Creates a refresh JWT token if the user is a valid customer OR vendor
+    - Expiry time: `60s`
+    - Input (JSON Body):
+    ```
+    {
+        "user_id":"3GpMaEm1DShNJzDFxTK853KsCYI3"
+    }
+    ```
+    - Expected Output:
+    ```
+    {
+        "token":"[SOME_TOKEN]"
+    }
+    ```
 
-- Make customer:
+### Security
+- JWT with HS256 (HMAC with SHA-256)
+- Secret: 512 bit key in .env (or GCP for live secret)
 
-```curl -i -X GET  http://34.217.14.89:4567/make_customer```
-- Charge: 
+### Test Cases
+An ongoing list of corner cases to test for
 
-```curl -d '{"amount":"1000", "customer_id":"cus_Eic7D12EByBANL", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EALLCF8Tv70HUia"}' -H "Content-Type: application/json" -X POST http://34.217.14.89:4567/charge```
-- Create connected account:
-
-```curl -d '{"account_auth_code":"ac_Eix70se8M3dejLmSxB2PMV3A7lQUjqg0"}' -H "Content-Type: application/json" -X POST http://34.217.14.89:4567/create-standard-account```
-
-- Create ephemeral key:
-
-```curl -d '{"customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14"}' -H "Content-Type: application/json" -X POST http:/34.217.14.89:4567/gen_ephemeral_key```
-
-### Account notes
-- **Primary:** Main Stripe Connect Account
-- **Connected - 1:** Connected account to main stripe account
-
-##### ADDITIONAL INFO: Connected - 1 
-CONNECTED_STRIPE_ACCOUNT_ID=```acct_1EALLCF8Tv70HUia```
-``` 
-curl -d '{"amount":"1000", "customer_id":"cus_EiVLxx6AchEMo9", "CONNECTED_STRIPE_ACCOUNT_ID":"acct_1EF7IEK75jC5vRr0"}' -H "Content-Type: application/json" -X POST http://34.217.14.89:4567/charge
-```
-
-### Deployment
-IMPORTANT: Set environment variable for Google Firestore as defined here: https://cloud.google.com/docs/authentication/getting-started
-0. Have mvp.pem in the directory you are running the following command with.
-1. Connect to EC2
-```ssh -i "mvp-1.pem" ubuntu@ec2-34-217-14-89.us-west-2.compute.amazonaws.com```
-2. Run server to unix shell
-```nohup ruby Clerc-Backend/src/server.rb &```
-
-###TODO make tutorial for deploying zip file to box
-```scp -i "mvp.pem" -C server.zip ubuntu@34.217.14.89:server.zip```
-
-### Monitoring
-1. Find pid of server is by looking for ruby server (number on immediate right of ubuntu):
-```ps aux | grep ruby```
-2. Tail to get logs of process with pid (ex <pid> = 8381):
-````tail -f /proc/<pid>/fd/1````
-
-### Certs 
-#### Https generating:
-
-    openssl genrsa 2048 > host.key
-    chmod 400 host.key
-    openssl req -new -x509 -nodes -sha256 -days 365 -key host.key -out host.cert
+#### Security
+- Invalid JWT in `token` JSON field
+- Expired JWT
+- No `token` field passed
+- Invalid user ID

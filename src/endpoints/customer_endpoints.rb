@@ -104,14 +104,4 @@ module CustomerEndpoints
     { charge_id: charge.id }.to_json
   end
 
-  # Returns 10 min JWT token for valid users
-  def refresh_token (json_input , firestore)
-    firestore_service = FirestoreService.new firestore
-    userID = json_input['userID']
-    if firestore_service.valid_user? userID
-      return JsonWebToken.encode(json_input, Time.now.to_i + 600)
-    else
-      return_error 401, "Access denied - invalid user ID"
-    end
-  end
 end

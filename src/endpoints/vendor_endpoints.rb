@@ -7,10 +7,9 @@ module VendorEndpoints
 
   include EndpointHelper
   include Util
-  STRIPE_API_SECRET = ENV['STRIPE_API_SECRET']
-  Stripe.api_key = STRIPE_API_SECRET
-  STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 
+  STRIPE_API_SECRET = 'sk_test_dsoNrcwd0QnNHt8znIVNpCJK'.freeze
+  STRIPE_CONNECTED_ACCT_URL = 'https://connect.stripe.com/oauth/token'.freeze
 
   DEFAULT_TXN_FEE_BASE = 0.0
   DEFAULT_TXN_FEE_PERCENT = 0.0
@@ -49,7 +48,7 @@ module VendorEndpoints
                                 form: stripe_data)
 
     # DEBUGGING ONLY
-    # log_info "Stripe response body: #{stripe_response.body}"
+    log_info "Stripe response body: #{stripe_response.body}"
 
     # Check that we have a returned success
     return_error 400, 'API Call to Stripe Failed' if stripe_response.code != 200

@@ -4,17 +4,15 @@ require_relative '../util'
 
 # Module for Firebase Firestore Service methods
 class FirestoreService
-
   include Util
 
   # Names of our firebase data structure
   STORES_COL_NAME = 'stores'.freeze
   VENDORS_COL_NAME = 'vendors'.freeze
+  CUSTOMERS_COL_NAME = 'customers'.freeze
   VENDOR_STORES_PROP = 'stores'.freeze
   STORE_BACKEND_COL_NAME = 'backend'.freeze
   STORE_BACKEND_STRIPE_DOC_NAME = 'stripe'.freeze
-
-  USER_COL_NAME = 'users'.freeze
 
   @firestore
 
@@ -29,7 +27,6 @@ class FirestoreService
   # @param [Store] store to save
   # @return [String] firestore id if successfully saved
   def save_store(store, vendor_id)
-
     # Reference to the stores collection
     stores_ref = @firestore.col STORES_COL_NAME
     basic_store_data = {
@@ -75,18 +72,16 @@ class FirestoreService
     store_firebase_id
   end
 
-  #
   # Loads and returns a store from firestore with the given ID
   # Returns nil if the store does not exist
   #
   # @param [String] id - firestore id for the store
   # @return [Store] - a store object or nil if not found
   def load_store(id)
-
     store_id = id
 
     # First get the main document - if this exists then the store exists
-    store_main_doc_ref  = @firestore.doc "#{STORES_COL_NAME}/#{store_id}"
+    store_main_doc_ref = @firestore.doc "#{STORES_COL_NAME}/#{store_id}"
     store_main_doc = store_main_doc_ref.get
     if store_main_doc.exists?
       store_name = store_main_doc.data[:name]
@@ -119,10 +114,22 @@ class FirestoreService
               txn_fee_base, txn_fee_percent, default_currency)
   end
 
+  # Determines if the given user ID is a valid entry within our database
+  # @param user_id The firebase ID of either a customer or a vendor
+  def valid_user?(user_id)
 
-  def valid_user?(userID)
-    userID_doc  = @firestore.doc "#{USER_COL_NAME}/#{userID}"
-    vendor_main_doc = userID_doc.get
-    return vendor_main_doc.exists?
+    # Customers use endpoints more often - so check this first
+    customer_doc = @firestore.col(CUSTOMERS_COL_NAME)
+                             .doc(user_id)
+                             .get
+    return true if customer_doc.exists?
+
+    # Try searching in vendors
+    vendor_doc = @firestore.col(VENDORS_COL_NAME)
+                           .doc(user_id)
+                           .get
+    return true if vendor_doc.exists?
+
+    false
   end
 end
