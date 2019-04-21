@@ -77,7 +77,7 @@ module CustomerEndpoints
     # Calculate the fee to charge
     application_fee = amount * store_from_firebase.txn_fee_percent / 100
     application_fee += store_from_firebase.txn_fee_base
-    puts application_fee # TODO: REMOVE ME AFTER TESTING
+    application_fee = application_fee.to_i # Stripe requires an integer
 
     begin
       # This creates a shared customer token, required for connected accounts

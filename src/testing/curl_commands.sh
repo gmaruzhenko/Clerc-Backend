@@ -18,7 +18,7 @@ printf "\n\nCharge\n"
 curl -d '{"customer_id": "cus_Eki4HaYdTlXbfc", "amount": 1000, "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI", "firebase_store_id": "kUCDZnMH33UFOoXfmJjm","token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzR3BNYUVtMURTaE5KekRGeFRLODUzS3NDWUkzIiwiZXhwIjoxNTU1ODM5MjgyfQ.UuvmV23v1u35IT03rOcvltZxwzQ1JBB87uT2YVS39iY" }' -H "Content-Type: application/json" -X POST http://localhost:4567/charge
 
 printf "\n\nCreate standard account\n"
-printf "Curretly not testable"
+printf "Currently not testable"
 #curl -d '{"account_auth_code":"ac_Em0BNEqBqTW3KMc5jaJW38HL5E1KjlhC","vendor_name":"test-store-123","token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzR3BNYUVtMURTaE5KekRGeFRLODUzS3NDWUkzIiwiZXhwIjoxNTU1ODM5MjgyfQ.UuvmV23v1u35IT03rOcvltZxwzQ1JBB87uT2YVS39iY"}' -H "Content-Type: application/json" -X POST http://localhost:4567/vendors/connect-standard-account
 
 printf "\n\n"
