@@ -6,13 +6,6 @@ module EndpointHelper
 
   include Util
 
-  # TODO: COMMENT OUT FOR DEPLOYMENT
-  # require 'dotenv'
-  # Dotenv.load
-  # JWT_KEY = ENV['JWT_KEY']
-
-  JWT_KEY = '!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w9z$C&F)J@NcQfTjWnZr4'.freeze
-
   # Parse JSON parameters from incoming response
   # Or return 400 if the request JSON is invalid
   def parse_json_params
@@ -30,7 +23,7 @@ module EndpointHelper
 
   # Returns input parameters if token is valid
   # Else will return a 401 error code
-  def check_jwt(input_json)
+  def check_jwt(input_json, secret)
 
     # Check that a token exists in the first place
     token_from_json = input_json['token']
@@ -42,7 +35,7 @@ module EndpointHelper
     # Decode the token - this will automatically check for expiry
     begin
       # decode_jwt will fail if the JWT has expired
-      jwt_token = decode_jwt input_json['token']
+      jwt_token = decode_jwt input_json['token'], secret
       # Also check that an expiry was actually given
       exp = jwt_token[0]['exp'] # The first in the array is the token
       if exp.nil?
@@ -64,18 +57,18 @@ module EndpointHelper
   end
 
   # Creates a new JWT token
-  def create_jwt(sub, exp)
+  def create_jwt(sub, exp, secret)
     payload = {
       sub: sub,
       exp: exp
     }
-    JWT.encode payload, JWT_KEY, 'HS256'
+    JWT.encode payload, secret, 'HS256'
   end
 
   # Decodes a given JWT key
   # THROWS JWT::ExpiredSignature if the JWT has expired
-  def decode_jwt(jwt)
-    JWT.decode jwt, JWT_KEY, true, algorithm: 'HS256'
+  def decode_jwt(jwt, secret)
+    JWT.decode jwt, secret, true, algorithm: 'HS256'
   end
 
 end

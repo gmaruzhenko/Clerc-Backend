@@ -50,7 +50,7 @@ module CustomerEndpoints
   # Charges a customer with a given store
   # Returns the transaction ID if successful
   #
-  def charge(json_input, firestore)
+  def charge(json_input, firestore_service)
     # Check that input is not empty, otherwise continue
     halt 400, 'Invalid request - no JSON given' if json_input.empty?
 
@@ -68,14 +68,17 @@ module CustomerEndpoints
       return_error 400, 'Invalid request - required params not passed'
     end
 
-    # Get firestore service
-    firestore_service = FirestoreService.new(firestore)
-
     # Try getting the Store object from firebase
     store_from_firebase = firestore_service.load_store firebase_store_id
     return_error 400, "Store #{firebase_store_id}  not found" if store_from_firebase.nil?
 
     store_stripe_id = store_from_firebase.stripe_user_id
+
+    # Calculate the fee to charge
+    application_fee = amount * store_from_firebase.txn_fee_percent / 100
+    application_fee += store_from_firebase.txn_fee_base
+    application_fee = application_fee.to_i # Stripe requires an integer
+
     begin
       # This creates a shared customer token, required for connected accounts
       token = Stripe::Source.create({
@@ -89,7 +92,7 @@ module CustomerEndpoints
                                        amount: amount,
                                        currency: 'cad',
                                        source: token.id,
-                                       application_fee_amount: 5,
+                                       application_fee_amount: application_fee,
                                        description: charge_description,
                                        statement_descriptor: statement_descriptor
                                      }, stripe_account: store_stripe_id)
@@ -103,5 +106,4 @@ module CustomerEndpoints
     # Return the charge ID
     { charge_id: charge.id }.to_json
   end
-
 end

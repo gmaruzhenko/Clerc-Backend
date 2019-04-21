@@ -5,12 +5,12 @@
 ```gem install bundler```
 2. Install required dependencies with Bundler (in root directory)
 ```bundle install```
-3. Download `.env (backend)` from Google Drive. Place it into the `src` folder and rename it to `.env`
-4. Download `Clerc-xxxxx.json` from Google Drive. This is required to authorize Firebase to access the clerc project.
-5. Place `Clerc-xxxxx.json` in any directory, then add it to your `PATH` with the following command: 
-`export GOOGLE_APPLICATION_CREDENTIALS="[PATH_TO_JSON]/[FILE_NAME].json"`
-6. Make sure dev-specific code is uncommented (ex. dotenv stuff)
-7. Run locally: `cd src` then `ruby server.rb`
+3. Download `Clerc-xxxxx.json` from Google Drive. This is required to authorize Firebase to access the Clerc project.
+4. Place `Clerc-xxxxx.json` in any directory, then add it to your `PATH` with the following command: 
+`export GOOGLE_APPLICATION_CREDENTIALS="[PATH_TO_JSON]/[FILE_NAME].json"`  
+- Example command: `export GOOGLE_APPLICATION_CREDENTIALS="../Clerc-2040e3a661c9.json"`
+5. Make sure dev-specific code is uncommented (ex. dotenv stuff)
+6. Run locally: `cd src` then `ruby server.rb`
 
 ### Endpoints
 
