@@ -94,6 +94,7 @@ module CustomerEndpoints
                                        source: token.id,
                                        application_fee_amount: application_fee,
                                        description: charge_description,
+                                       recept_email: "gmaruzhenko@gmail.com",
                                        statement_descriptor: statement_descriptor
                                      }, stripe_account: store_stripe_id)
     rescue Stripe::StripeError => e

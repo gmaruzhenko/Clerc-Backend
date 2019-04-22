@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #USAGE
 #run bash curl_commands.ah to hit all endpoints
-
+JWT="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhaFZzcHRkZ1BZaFlQZ3FtQmQyejVrcmhvOHMxIiwiZXhwIjoxNTU2NDk2NzEyfQ.ewGL8OVmgcKy7rBbo2ViGqvKUerIIeo5sMLUwxbNBXQ"
 printf "Test connection\n"
 curl -X GET http://localhost:4567/
 
 printf "\n\nValidate JWT Refresh\n"
 curl -d '{"user_id":"ahVsptdgPYhYPgqmBd2z5krho8s1"}' -H "Content-Type: application/json" -X POST http:/localhost:4567/jwt/refresh
-
+printf $JWT
 printf "\n\nCreate Ephemeral Key\n"
-curl -d '{"customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14","token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzR3BNYUVtMURTaE5KekRGeFRLODUzS3NDWUkzIiwiZXhwIjoxNTU1ODM5MjgyfQ.UuvmV23v1u35IT03rOcvltZxwzQ1JBB87uT2YVS39iY"}' -H "Content-Type: application/json" -X POST http:/localhost:4567/customers/create-ephemeral-key
+curl -d '{"customer_id":"cus_Eic7D12EByBANL","stripe_version":"2019-03-14","token":"$JWT"}' -H "Content-Type: application/json" -X POST http:/localhost:4567/customers/create-ephemeral-key
 
 printf "\n\nCreate Customer\n"
 curl -d '' -X POST http://localhost:4567/customers/create
