@@ -104,9 +104,8 @@ module CustomerEndpoints
 
     # Charge successful
     log_info 'Charge successful'
-    puts charge.receipt_url.to_s
     status 201
     # Return the charge ID
-    { charge_id: charge.id }.to_json
+    { charge_id: charge.id}.to_json
   end
 end

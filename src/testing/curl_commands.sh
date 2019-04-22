@@ -17,7 +17,7 @@ printf "\n\nCreate Customer\n"
 curl -d '' -X POST http://localhost:4567/customers/create
 
 printf "\n\nCharge\n"
-curl -d '{"customer_id": "cus_Eki4HaYdTlXbfc","email":"gmaruzhenko@gmail.com", "amount": 1000, "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI", "firebase_store_id": "kUCDZnMH33UFOoXfmJjm","token":"'$JWT'" }' -H "Content-Type: application/json" -X POST http://localhost:4567/charge
+curl -d '{"customer_id": "cus_Eki4HaYdTlXbfc", "amount": 1000, "source": "src_1EHHPTLrlHDdcgZ3P8HWzrrI", "firebase_store_id": "kUCDZnMH33UFOoXfmJjm","token":"'$JWT'" }' -H "Content-Type: application/json" -X POST http://localhost:4567/charge
 
 printf "\n\nCreate standard account\n"
 printf "Currently not testable"
