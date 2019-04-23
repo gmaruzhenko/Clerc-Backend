@@ -8,7 +8,7 @@
 3. Download `Clerc-xxxxx.json` from Google Drive. This is required to authorize Firebase to access the Clerc project.
 4. Place `Clerc-xxxxx.json` in any directory, then add it to your `PATH` with the following command: 
 `export GOOGLE_APPLICATION_CREDENTIALS="[PATH_TO_JSON]/[FILE_NAME].json"`  
-- Example command: `export GOOGLE_APPLICATION_CREDENTIALS="../Clerc-2040e3a661c9.json"`
+- Example command: `export GOOGLE_APPLICATION_CREDENTIALS="../Clerc-DEV.json"`
 5. Make sure dev-specific code is uncommented (ex. dotenv stuff)
 6. Run locally: `cd src` then `ruby server.rb`
 
