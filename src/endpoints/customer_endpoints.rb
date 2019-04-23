@@ -61,6 +61,7 @@ module CustomerEndpoints
     payment_src = json_input['source']
     charge_description = json_input['description']
     statement_descriptor = json_input['statement_descriptor']
+    customer_email = json_input['email']
 
     # Note : we don't need payment source because Stripe's mobile SDK
     # automatically updates payment method via standard integration
@@ -94,6 +95,7 @@ module CustomerEndpoints
                                        source: token.id,
                                        application_fee_amount: application_fee,
                                        description: charge_description,
+                                       receipt_email: customer_email,
                                        statement_descriptor: statement_descriptor
                                      }, stripe_account: store_stripe_id)
     rescue Stripe::StripeError => e
