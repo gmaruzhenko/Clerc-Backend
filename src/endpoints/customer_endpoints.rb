@@ -106,6 +106,6 @@ module CustomerEndpoints
     log_info 'Charge successful'
     status 201
     # Return the charge ID
-    { charge_id: charge.id}.to_json
+    { charge_id: charge.id }.to_json
   end
 end
