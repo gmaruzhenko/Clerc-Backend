@@ -125,3 +125,7 @@ An ongoing list of corner cases to test for
 - Expired JWT
 - No `token` field passed
 - Invalid user ID
+
+## License
+
+Copyright © 2019 Clerc Technology Inc, All rights reserved
