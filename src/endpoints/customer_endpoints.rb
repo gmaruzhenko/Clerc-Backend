@@ -70,8 +70,8 @@ module CustomerEndpoints
     end
 
     # Try getting the Store object from firebase
-    store_from_firebase = firestore_service.load_store firebase_store_id
-    return_error 400, "Store #{firebase_store_id}  not found" if store_from_firebase.nil?
+    store_from_firebase = firestore_service.get_store firebase_store_id
+    return_error 400, "Store #{firebase_store_id} not found" if store_from_firebase.nil?
 
     store_stripe_id = store_from_firebase.stripe_user_id
 
