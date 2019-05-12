@@ -3,28 +3,40 @@ require 'mailgun-ruby'
 
 # Module for sending emails
 class EmailService
+
+  DOMAIN = 'sandboxfd497370822546c4bafcf67da66be80e.mailgun.org'.freeze
+
   # Constructor
   def initialize(firestore_service, api_key)
     @firestore_service = firestore_service
     @mailgun = Mailgun::Client.new api_key
   end
 
-  # TODO currently returns true/false - think this thru?
   # Sends an email receipt for the transaction
+  #
+  # @param txn_id The ID of a tranasaction in firebase
+  # @param cust_name Will be used as First Name for recipient
+  # @param cust_email Destination for the receipt
+  # @return true if successful
   def send_email(txn_id, cust_name, cust_email)
+
     transaction = @firestore_service.get_txn txn_id
+    recipient_name = if !cust_name.nil?
+                       cust_name
+                     else
+                       'Clerc Customer'
+                     end
 
     unless transaction.nil?
       msg_builder = Mailgun::MessageBuilder.new
-      msg_builder.from('no-reply@paywithclerc.com', first: 'Clerc')
-      msg_builder.add_recipient(:to, cust_email, 'first' => cust_name)
+      msg_builder.from("no-reply@#{DOMAIN}", first: 'Clerc')
+      msg_builder.add_recipient(:to, cust_email, 'first' => recipient_name)
       msg_builder.subject('Your Receipt from Clerc Mobile Checkout')
-      msg_builder.body_html(build_email_body(transaction, cust_name))
+      msg_builder.body_html(build_email_body(transaction, recipient_name))
 
-      result = @mailgun.send_message('paywithclerc.com', msg_builder)
+      result = @mailgun.send_message(DOMAIN, msg_builder)
 
-      puts result.body.to_s
-      true
+      return true unless result.to_h[:id].nil?
     end
 
     false
