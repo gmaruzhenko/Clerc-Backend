@@ -36,7 +36,7 @@ class EmailService
 
       result = @mailgun.send_message(DOMAIN, msg_builder)
 
-      return true unless result.to_h[:id].nil?
+      return true unless result.to_h['id'].nil?
     end
 
     false

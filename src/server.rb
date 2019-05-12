@@ -14,6 +14,7 @@ require_relative 'endpoints/endpoint_helper'
 require_relative 'endpoints/vendor_endpoints'
 require_relative 'endpoints/security_endpoints'
 require_relative 'service/firestore_service'
+require_relative 'service/email_service'
 
 # Include the modules that we need
 include EndpointHelper
@@ -38,9 +39,13 @@ firestore_service = FirestoreService.new firestore
 # Get secrets
 jwt_secret = firestore_service.get_secret FirestoreService::JWT_KEY_DOC
 stripe_secret = firestore_service.get_secret FirestoreService::STRIPE_KEY_DOC
+mailgun_secret = firestore_service.get_secret FirestoreService::MAILGUN_KEY_DOC
 
 # Initialize Stripe
 Stripe.api_key = stripe_secret
+
+# Initialize email service
+email_service = EmailService.new firestore_service, mailgun_secret
 
 # Test endpoint to check if server is up
 get '/' do
@@ -61,6 +66,11 @@ end
 # Creates ephemeral key for mobile client to grant permissions
 post '/customers/create-ephemeral-key' do
   return create_ephemeral_key check_jwt(parse_json_params, jwt_secret)
+end
+
+# Sends a receipt email
+post '/customers/email-receipt' do
+  return send_receipt_email parse_json_params, email_service
 end
 
 # Creates a charge on a stripe connected account

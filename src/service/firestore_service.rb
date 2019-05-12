@@ -20,6 +20,7 @@ class FirestoreService
   SECRETS_COL_NAME = 'secrets'.freeze
   JWT_KEY_DOC = 'JWT_KEY'.freeze
   STRIPE_KEY_DOC = 'STRIPE_API_SECRET'.freeze
+  MAILGUN_KEY_DOC = 'MAILGUN'.freeze
 
   # Constructor
   def initialize(firestore)
