@@ -10,7 +10,7 @@ class Transaction
     @txn_id = txn_id
     @total_amount = total_amount
     @taxes_amount = taxes_amount
-    @date = date
+    @date = date # Ruby date object
     @store_id = store_id
     @items = items
   end

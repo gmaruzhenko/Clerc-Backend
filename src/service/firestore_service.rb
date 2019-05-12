@@ -1,5 +1,6 @@
 require 'google/cloud/firestore'
 require_relative '../model/store'
+require_relative '../model/transaction'
 require_relative '../util'
 
 # Module for Firebase Firestore Service methods
@@ -19,8 +20,6 @@ class FirestoreService
   SECRETS_COL_NAME = 'secrets'.freeze
   JWT_KEY_DOC = 'JWT_KEY'.freeze
   STRIPE_KEY_DOC = 'STRIPE_API_SECRET'.freeze
-
-  @firestore
 
   # Constructor
   def initialize(firestore)
@@ -134,20 +133,16 @@ class FirestoreService
       # Construct the transaction object that we need
       txn_data = txn_doc.data
 
-      puts(txn_data)
-
       # Deconstruct main transaction object
       total_amt = txn_data[:amount]
       tax_amt = txn_data[:taxes]
-      date = txn_data[:date]
+      date = txn_data[:date] # Ruby date object
       store_id = txn_data[:store_id]
-      itemsFromFirestore = txn_data[:items]
+      items_from_firestore = txn_data[:items]
 
       # Deconstruct each item
       items = []
-      itemsFromFirestore.each do |firestore_item|
-
-        puts firestore_item
+      items_from_firestore.each do |firestore_item|
 
         item_name = firestore_item[:name]
         item_cost = firestore_item[:cost]
@@ -157,8 +152,6 @@ class FirestoreService
         items.push Transaction::Item.new(item_name, item_cost,
                                          item_price_unit, item_qty)
       end
-
-      puts items
 
       Transaction.new(txn_id, total_amt, tax_amt,
                       date, store_id, items)
