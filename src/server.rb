@@ -65,12 +65,12 @@ end
 
 # Creates ephemeral key for mobile client to grant permissions
 post '/customers/create-ephemeral-key' do
-  return create_ephemeral_key check_jwt(parse_json_params, jwt_secret)
+  return create_ephemeral_key(check_jwt(parse_json_params, jwt_secret))
 end
 
 # Sends a receipt email
 post '/customers/email-receipt' do
-  return send_receipt_email parse_json_params, email_service
+  return send_receipt_email(check_jwt(parse_json_params, jwt_secret), email_service)
 end
 
 # Creates a charge on a stripe connected account

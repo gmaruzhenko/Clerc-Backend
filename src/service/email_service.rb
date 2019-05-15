@@ -3,8 +3,7 @@ require 'mailgun-ruby'
 
 # Module for sending emails
 class EmailService
-
-  DOMAIN = 'sandboxfd497370822546c4bafcf67da66be80e.mailgun.org'.freeze
+  DOMAIN = 'receipts.paywithclerc.com'.freeze
 
   # Constructor
   def initialize(firestore_service, api_key)
@@ -19,9 +18,8 @@ class EmailService
   # @param cust_email Destination for the receipt
   # @return true if successful
   def send_email(txn_id, cust_name, cust_email)
-
     transaction = @firestore_service.get_txn txn_id
-    recipient_name = if !cust_name.nil?
+    recipient_name = if !cust_name.nil? && !cust_name.empty?
                        cust_name
                      else
                        'Clerc Customer'
@@ -29,8 +27,8 @@ class EmailService
 
     unless transaction.nil?
       msg_builder = Mailgun::MessageBuilder.new
-      msg_builder.from("no-reply@#{DOMAIN}", first: 'Clerc')
-      msg_builder.add_recipient(:to, cust_email, 'first' => recipient_name)
+      msg_builder.from("noreply@#{DOMAIN}", {"first" => 'Clerc', "last" => 'Receipts'})
+      msg_builder.add_recipient(:to, cust_email, {"first" => recipient_name, "last" => ''})
       msg_builder.subject('Your Receipt from Clerc Mobile Checkout')
       msg_builder.body_html(build_email_body(transaction, recipient_name))
 
