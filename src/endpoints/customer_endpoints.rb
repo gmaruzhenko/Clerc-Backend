@@ -70,8 +70,8 @@ module CustomerEndpoints
     end
 
     # Try getting the Store object from firebase
-    store_from_firebase = firestore_service.load_store firebase_store_id
-    return_error 400, "Store #{firebase_store_id}  not found" if store_from_firebase.nil?
+    store_from_firebase = firestore_service.get_store firebase_store_id
+    return_error 400, "Store #{firebase_store_id} not found" if store_from_firebase.nil?
 
     store_stripe_id = store_from_firebase.stripe_user_id
 
@@ -108,4 +108,32 @@ module CustomerEndpoints
     # Return the charge ID
     { charge_id: charge.id }.to_json
   end
+
+  #
+  # Sends an email receipt to the customer
+  #
+  def send_receipt_email(json_input, email_service)
+    # Check that input is not empty, otherwise continue
+    halt 400, 'Invalid request - no JSON given' if json_input.empty?
+
+    # Check that required params are passed
+    txn_id = json_input['txn_id']
+    cust_email = json_input['customer_email']
+    cust_name = json_input['customer_name']
+
+    # cust_name not required - check for everything else
+    return_error 400, 'Invalid request - required params not passed' if
+      txn_id.nil? || cust_email.nil? || txn_id.empty? || cust_email.empty?
+
+    result = email_service.send_email txn_id, cust_name, cust_email
+    if result
+      log_info 'Email dispatched'
+      status 201
+      { result: 'success' }.to_json
+    else
+      log_info 'Something went wrong while sending email'
+      return_error 500, 'Email not sent'
+    end
+  end
+
 end

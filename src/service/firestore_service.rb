@@ -1,5 +1,6 @@
 require 'google/cloud/firestore'
 require_relative '../model/store'
+require_relative '../model/transaction'
 require_relative '../util'
 
 # Module for Firebase Firestore Service methods
@@ -10,6 +11,7 @@ class FirestoreService
   STORES_COL_NAME = 'stores'.freeze
   VENDORS_COL_NAME = 'vendors'.freeze
   CUSTOMERS_COL_NAME = 'customers'.freeze
+  TXN_COL_NAME = 'transactions'.freeze
   VENDOR_STORES_PROP = 'stores'.freeze
   STORE_BACKEND_COL_NAME = 'backend'.freeze
   STORE_BACKEND_STRIPE_DOC_NAME = 'stripe'.freeze
@@ -18,8 +20,7 @@ class FirestoreService
   SECRETS_COL_NAME = 'secrets'.freeze
   JWT_KEY_DOC = 'JWT_KEY'.freeze
   STRIPE_KEY_DOC = 'STRIPE_API_SECRET'.freeze
-
-  @firestore
+  MAILGUN_KEY_DOC = 'MAILGUN'.freeze
 
   # Constructor
   def initialize(firestore)
@@ -82,7 +83,7 @@ class FirestoreService
   #
   # @param [String] id - firestore id for the store
   # @return [Store] - a store object or nil if not found
-  def load_store(id)
+  def get_store(id)
     store_id = id
 
     # First get the main document - if this exists then the store exists
@@ -118,6 +119,47 @@ class FirestoreService
     Store.new(store_id, store_name, store_str_pub_key,
               store_str_user_id, store_str_ref_tok, store_str_acc_tok,
               txn_fee_base, txn_fee_percent, default_currency)
+  end
+
+  # Returns a transaction from firestore given the transaction ID
+  #
+  # @param id The transaction ID in firestore - same as stripe ID
+  # @return Transaction object
+  def get_txn(id)
+    txn_id = id
+
+    # Get the transaction and check that it exists
+    txn_doc = @firestore.col(TXN_COL_NAME).doc(txn_id).get
+    if txn_doc.exists?
+      # Construct the transaction object that we need
+      txn_data = txn_doc.data
+
+      # Deconstruct main transaction object
+      total_amt = txn_data[:amount]
+      tax_amt = txn_data[:taxes]
+      date = txn_data[:date] # Ruby date object
+      store_id = txn_data[:store_id]
+      items_from_firestore = txn_data[:items]
+
+      # Deconstruct each item
+      items = []
+      items_from_firestore.each do |firestore_item|
+
+        item_name = firestore_item[:name]
+        item_cost = firestore_item[:cost]
+        item_qty = firestore_item[:quantity]
+        item_price_unit = firestore_item[:price_unit]
+        # Add to array
+        items.push Transaction::Item.new(item_name, item_cost,
+                                         item_price_unit, item_qty)
+      end
+
+      Transaction.new(txn_id, total_amt, tax_amt,
+                      date, store_id, items)
+    else
+      log_info "Transaction with id #{txn_id} was not found"
+      nil
+    end
   end
 
   # Determines if the given user ID is a valid entry within our database
