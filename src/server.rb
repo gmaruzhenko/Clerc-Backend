@@ -30,7 +30,7 @@ set :allow_methods, 'GET,POST'
 set :allow_headers, 'content-type,access-control-allow-origin'
 
 # Initialize the base firestore service
-firestore = Google::Cloud::Firestore.new project_id: 'paywithclerc-dev'
+firestore = Google::Cloud::Firestore.new project_id: 'paywithclerc'
 puts 'Firestore client initialized'
 
 # Initialize our own abstraction service for firestore
